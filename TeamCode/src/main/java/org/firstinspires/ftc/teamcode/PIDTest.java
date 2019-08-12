@@ -9,16 +9,16 @@ public class PIDTest{
     private double rError;
     private double[] vector;
     private boolean reached;
-    private float P; private float I; private float D;
+    private double P; private double I; private double D;
     private double uLastError;
     private double rLastError;
     private double uLastI;
     private double rLastI;
-    private float lastTime;
+    private double lastTime;
     private double uIntegrater;
     private double rIntegrater;
 
-    public PIDTest(float up, float right, float p, float i, float d){
+    public PIDTest(double up, double right, double p, double i,  double d){
 
         uMagnitude = 0;
         rMagnitude = 0;
@@ -37,12 +37,12 @@ public class PIDTest{
     }
     public double[] getCurrentVector(){return vector;}
     public boolean getReached(){return reached;}
-    public void setErrors(double u, double r) {
+    public double[] calcErrors(double u, double r) {
         uError = u;
         rError = r;
-        calcMagnitude(uError, rError);
+        return calcMagnitude(uError, rError);
     }
-    private void calcMagnitude(double uE, double rE){
+    private double[] calcMagnitude(double uE, double rE){
         //calc with error to get speed, do this in loop with calc and putting in values.
         //Find a way to get reached = true when mags = 0, then can end loop
         //Copy in Drew's Mecanum calcs
@@ -91,7 +91,10 @@ public class PIDTest{
         uLastError = uE;
         rLastError = rE;
 
+        vector[0] = uMagnitude;
+        vector[1] = rMagnitude;
 
+        return vector;
 
 
     }
