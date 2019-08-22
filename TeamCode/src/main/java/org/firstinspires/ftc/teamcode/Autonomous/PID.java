@@ -1,6 +1,6 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Autonomous;
 
-public class PIDTest{
+public class PID {
 
     //Figure out how to make it all in PID, vector should be combined anyway
     private double yMagnitude; //Not really Magnitude, can be negative. To be Psuedo Stick Input
@@ -18,7 +18,7 @@ public class PIDTest{
     private double yIntegrater;
     private double xIntegrater;
 
-    public PIDTest(double up, double right, double p, double i,  double d){
+    public PID(double up, double right, double p, double i, double d){
 
         yMagnitude = 0;
         xMagnitude = 0;
