@@ -36,4 +36,32 @@ public class IMU {
         }
         return currentHeading;
     }
+
+    public double headingAdjustment(double targetHeading){
+        double adjustment;
+        double currentHeading;
+        double degreesOff;
+        boolean goRight;
+
+        currentHeading = readCurrentHeading();
+
+        goRight = targetHeading > currentHeading;
+        degreesOff = Math.abs(targetHeading - currentHeading);
+
+        if (degreesOff > 180) {
+            goRight = !goRight;
+            degreesOff = 360 - degreesOff;
+        }
+
+        if (degreesOff < .3) {
+            adjustment = 0;
+        } else {
+            adjustment = (Math.pow((degreesOff + 2) / 5, 2) + 2) / 100;
+        }
+
+        if (goRight) {
+            adjustment = -adjustment;
+        }
+        return adjustment;
+    }
 }

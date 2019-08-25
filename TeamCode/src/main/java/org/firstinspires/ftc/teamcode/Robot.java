@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.Autonomous.PID;
 import org.firstinspires.ftc.teamcode.Autonomous.RoboPosition;
 import org.firstinspires.ftc.teamcode.Hardware.DriveTrain;
 import org.firstinspires.ftc.teamcode.Hardware.IMU;
@@ -30,48 +31,36 @@ abstract public class Robot extends LinearOpMode {
 
         driveTrain = new DriveTrain(lf, rf, lr, rr);
         odometers = new Odometers(xOdom, yOdom);
+
+        waitForStart();
     }
 
-    public void driveToPoint(double x, double y, double speed, double heading) {
-        while (Math.abs(RoboPosition.currentXPos - x) > 50 && Math.abs(RoboPosition.currentYPos - y) > 50) {
+    public void driveToPoint(double x, double y, double heading) {
+        PID pid = new PID(x, y, .06,.06,.05);
+
+        double distanceToX = x - RoboPosition.currentXPos;
+        double distanceToY = y - RoboPosition.currentXPos;
+
+        double[] vector = pid.calcErrors(distanceToX, distanceToY);
+
+        while (vector[0] != 0 && vector[1] != 0) {
             RoboPosition.currentXPos = odometers.xOdom.getCurrentPosition();
             RoboPosition.currentYPos = odometers.yOdom.getCurrentPosition();
             RoboPosition.currentHeading = imu.readCurrentHeading();
-            double distanceToX = x - RoboPosition.currentXPos;
-            double distanceToY = y - RoboPosition.currentXPos;
+
+            distanceToX = x - RoboPosition.currentXPos;
+            distanceToY = y - RoboPosition.currentXPos;
+
+            vector = pid.calcErrors(distanceToX, distanceToY);
+            double wheelPower = Math.hypot(vector[0], vector[1]);
+
             double angleradians;
-            angleradians = Math.atan2(distanceToX,distanceToY);
-            double adjustment = headingAdjustment(heading);
-            driveTrain.applyPower(speed * Math.cos(angleradians) + adjustment,speed * Math.sin(angleradians) - adjustment,speed * Math.cos(angleradians) + adjustment, speed * Math.sin(angleradians) - adjustment);
+            angleradians = Math.atan2(distanceToX,distanceToY) - Math.PI / 4;
+
+            double adjustment = imu.headingAdjustment(heading);
+
+            driveTrain.applyPower(wheelPower * Math.cos(angleradians) + adjustment,wheelPower * Math.sin(angleradians) - adjustment,wheelPower * Math.cos(angleradians) + adjustment, wheelPower * Math.sin(angleradians) - adjustment);
         }
         driveTrain.applyPower(0,0,0,0);
-    }
-
-    public double headingAdjustment(double targetHeading){
-        double adjustment;
-        double currentHeading;
-        double degreesOff;
-        boolean goRight;
-
-        currentHeading = imu.readCurrentHeading();
-
-        goRight = targetHeading > currentHeading;
-        degreesOff = Math.abs(targetHeading - currentHeading);
-
-        if (degreesOff > 180) {
-            goRight = !goRight;
-            degreesOff = 360 - degreesOff;
-        }
-
-        if (degreesOff < .3) {
-            adjustment = 0;
-        } else {
-            adjustment = (Math.pow((degreesOff + 2) / 5, 2) + 2) / 100;
-        }
-
-        if (goRight) {
-            adjustment = -adjustment;
-        }
-        return adjustment;
     }
 }

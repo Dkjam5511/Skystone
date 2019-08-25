@@ -37,12 +37,12 @@ public class PID {
     }
     public double[] getCurrentVector(){return vector;}
     public boolean getReached(){return reached;}
-    public double[] calcErrors(double y, double x) {
+    public double[] calcErrors(double x, double y) {
         yError = y;
         xError = x;
-        return calcMagnitude(yError, xError);
+        return calcMagnitude(xError, yError);
     }
-    private double[] calcMagnitude(double yE, double xE){
+    private double[] calcMagnitude(double xE, double yE){
         //calc with error to get speed, do this in loop with calc and putting in values.
         //Find a way to get reached = true when mags = 0, then can end loop
         //Copy in Drew's Mecanum calcs
@@ -91,8 +91,8 @@ public class PID {
         yLastError = yE;
         xLastError = xE;
 
-        vector[0] = yMagnitude;
-        vector[1] = xMagnitude;
+        vector[0] = xMagnitude;
+        vector[1] = yMagnitude;
 
         return vector;
     }
