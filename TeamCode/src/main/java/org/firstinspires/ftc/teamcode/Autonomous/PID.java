@@ -14,7 +14,8 @@ public class PID {
     private double xLastError;
     private double xLastI;
     private double yLastI;
-    private double lastTime;
+    private double lastTimeX;
+    private double lastTimeY;
     private double yIntegrater;
     private double xIntegrater;
 
@@ -31,7 +32,8 @@ public class PID {
         xLastError = 0;
         yLastI = 0;
         xLastI = 0;
-        lastTime = System.currentTimeMillis();
+        lastTimeX = System.currentTimeMillis();
+        lastTimeY = System.currentTimeMillis();
         yIntegrater = 0;
         xIntegrater = 0;
     }
@@ -54,9 +56,9 @@ public class PID {
         xIntegrater = 0;
 
         yMagnitude += yE * P;
-        yMagnitude += ((System.currentTimeMillis() - lastTime) * (yE - yLastError)) * D;
+        yMagnitude += ((System.currentTimeMillis() - lastTimeY) * (yE - yLastError)) * D;
         //Not adding the integral just yet, need to check if windup occured
-        yIntegrater = ((System.currentTimeMillis() - lastTime) * (yE * yLastError/2) + yLastI) * I;
+        yIntegrater = ((System.currentTimeMillis() - lastTimeY) * (yE * yLastError/2) + yLastI) * I;
         if (yMagnitude + yIntegrater > 1 && yE > 0 && yIntegrater > 0){
             //Integral is winding up in the positive direction, so it is getting clamped
             yMagnitude = 1;
@@ -71,8 +73,8 @@ public class PID {
         }
 
         xMagnitude += xE * P;
-        xMagnitude += ((System.currentTimeMillis() - lastTime) * (xE - xLastError)) * D;
-        xIntegrater += ((System.currentTimeMillis() - lastTime) * (xE * xLastError/2) + xLastI) * I;
+        xMagnitude += ((System.currentTimeMillis() - lastTimeX) * (xE - xLastError)) * D;
+        xIntegrater += ((System.currentTimeMillis() - lastTimeX) * (xE * xLastError/2) + xLastI) * I;
         if (xMagnitude + xIntegrater > 1 && xE > 0 && xIntegrater > 0){
             //Integral is winding up in the positive direction, so it is getting clamped
             xMagnitude = 1;
@@ -86,8 +88,9 @@ public class PID {
             xMagnitude += xIntegrater;
         }
         xLastI = xIntegrater;
-        xLastI = xIntegrater;
-        lastTime = System.currentTimeMillis();
+        yLastI = yIntegrater;
+        lastTimeX = System.currentTimeMillis();
+        lastTimeY = System.currentTimeMillis();
         yLastError = yE;
         xLastError = xE;
 
