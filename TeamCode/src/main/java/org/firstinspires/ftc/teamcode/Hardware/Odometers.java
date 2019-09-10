@@ -10,4 +10,12 @@ public class Odometers {
         this.xOdom = xOdom;
         this.yOdom = yOdom;
     }
+
+    public double getXPos(){
+        return -xOdom.getCurrentPosition();
+    }
+
+    public double getYPOs(){
+        return -yOdom.getCurrentPosition();
+    }
 }

@@ -29,16 +29,16 @@ public class DriveTrain{
         lr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        lr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void applyPower(double lf, double rf, double lr, double rr){
-        this.lf.setPower(lf);
-        this.rf.setPower(rf);
-        this.lr.setPower(lr);
-        this.rr.setPower(rr);
+    public void applyPower(double lfpower, double rfpower, double lrpower, double rrpower){
+        this.lf.setPower(lfpower);
+        this.rf.setPower(rfpower);
+        this.lr.setPower(lrpower);
+        this.rr.setPower(rrpower);
     }
 }

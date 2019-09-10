@@ -18,7 +18,7 @@ public class PID {
     private double yIntegrater;
     private double xIntegrater;
 
-    public PID(double up, double right, double p, double i, double d){
+    public PID(double right, double up, double p, double i, double d){
 
         yMagnitude = 0;
         xMagnitude = 0;
@@ -57,13 +57,13 @@ public class PID {
         yMagnitude += ((System.currentTimeMillis() - lastTime) * (yE - yLastError)) * D;
         //Not adding the integral just yet, need to check if windup occured
         yIntegrater = ((System.currentTimeMillis() - lastTime) * (yE * yLastError/2) + yLastI) * I;
-        if (yMagnitude + yIntegrater > 1 && yE > 0 && yIntegrater > 0){
+        if (yMagnitude + yIntegrater > .5 && yE > 0 && yIntegrater > 0){
             //Integral is winding up in the positive direction, so it is getting clamped
-            yMagnitude = 1;
+            yMagnitude = .5;
         }
-        else if (yMagnitude + yIntegrater < -1 && yE < 0 && yIntegrater < 0){
+        else if (yMagnitude + yIntegrater < -.5 && yE < 0 && yIntegrater < 0){
             //Integral is winding up in the negative direction, so it is getting clamped
-            yMagnitude = -1;
+            yMagnitude = -.5;
         }
         else {
             //Integral is not winding up, so we can safely use the value and add it in!
@@ -73,13 +73,13 @@ public class PID {
         xMagnitude += xE * P;
         xMagnitude += ((System.currentTimeMillis() - lastTime) * (xE - xLastError)) * D;
         xIntegrater += ((System.currentTimeMillis() - lastTime) * (xE * xLastError/2) + xLastI) * I;
-        if (xMagnitude + xIntegrater > 1 && xE > 0 && xIntegrater > 0){
+        if (xMagnitude + xIntegrater > .5 && xE > 0 && xIntegrater > 0){
             //Integral is winding up in the positive direction, so it is getting clamped
-            xMagnitude = 1;
+            xMagnitude = .5;
         }
-        else if (xMagnitude + xIntegrater < -1 && xE < 0 && xIntegrater < 0){
+        else if (xMagnitude + xIntegrater < -.5 && xE < 0 && xIntegrater < 0){
             //Integral is winding up in the negative direction, so it is getting clamped
-            xMagnitude = -1;
+            xMagnitude = -.5 ;
         }
         else {
             //Integral is not winding up, so we can safely use the value and add it in!
