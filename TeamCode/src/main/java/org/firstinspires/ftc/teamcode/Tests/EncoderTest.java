@@ -11,14 +11,16 @@ public class EncoderTest extends OpMode {
 
     @Override
     public void init() {
-        encoderMotor = hardwareMap.dcMotor.get("lr");
-        encoderMotor1 = hardwareMap.dcMotor.get("rr");
+        encoderMotor = hardwareMap.dcMotor.get("hl");
+
+        encoderMotor.setDirection(DcMotor.Direction.REVERSE);
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Encoder Value X:", -encoderMotor.getCurrentPosition());
-        telemetry.addData("Encoder Value Y:", encoderMotor1.getCurrentPosition());
+        encoderMotor.setPower(gamepad1.left_stick_y);
+
+        telemetry.addData("Encoder Value X:", encoderMotor.getCurrentPosition());
 
     }
 }

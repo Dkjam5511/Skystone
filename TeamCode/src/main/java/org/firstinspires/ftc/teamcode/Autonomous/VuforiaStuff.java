@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static android.graphics.Bitmap.createScaledBitmap;
+
 public class VuforiaStuff {
 
     VuforiaLocalizer vuforia;
@@ -63,7 +65,7 @@ public class VuforiaStuff {
             // copy the bitmap from the Vuforia frame
             Bitmap bitmap = Bitmap.createBitmap(rgbImage.getWidth(), rgbImage.getHeight(), Bitmap.Config.RGB_565);
             bitmap.copyPixelsFromBuffer(rgbImage.getPixels());
-
+/*
             String path = Environment.getExternalStorageDirectory().toString();
             FileOutputStream out = null;
             try {
@@ -82,7 +84,26 @@ public class VuforiaStuff {
                     e.printStackTrace();
                 }
             }
-
+*/
+            bitmap = createScaledBitmap(bitmap, 320, 180, true);
+/*
+            try {
+                File file = new File(path, "BitmapCropped.png");
+                out = new FileOutputStream(file);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (out != null) {
+                        out.flush();
+                        out.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+*/
             int height;
             int width;
             int pixel;

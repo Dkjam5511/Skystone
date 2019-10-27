@@ -2,19 +2,15 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.Autonomous.PID;
-import org.firstinspires.ftc.teamcode.Autonomous.RoboPosition;
 import org.firstinspires.ftc.teamcode.Autonomous.VuforiaStuff;
 import org.firstinspires.ftc.teamcode.Hardware.DriveTrain;
 import org.firstinspires.ftc.teamcode.Hardware.IMU;
 import org.firstinspires.ftc.teamcode.Hardware.Odometers;
-
-import static org.firstinspires.ftc.teamcode.Autonomous.RoboPosition.currentXPos;
-import static org.firstinspires.ftc.teamcode.Autonomous.RoboPosition.currentYPos;
 
 abstract public class Robot extends LinearOpMode {
     public DriveTrain driveTrain;
@@ -27,14 +23,14 @@ abstract public class Robot extends LinearOpMode {
     BNO055IMU gyro;
 
     public void roboInit() {
-        /*
+
         DcMotor lf = hardwareMap.dcMotor.get("lf");
         DcMotor rf = hardwareMap.dcMotor.get("rf");
         DcMotor lr = hardwareMap.dcMotor.get("lr");
         DcMotor rr = hardwareMap.dcMotor.get("rr");
-        DcMotor xOdom = hardwareMap.dcMotor.get("lf");
-        DcMotor yOdom = hardwareMap.dcMotor.get("rf");
-         */
+        DcMotor xOdom = hardwareMap.dcMotor.get("li");
+        DcMotor yOdom = hardwareMap.dcMotor.get("ri");
+
         gyro = hardwareMap.get(BNO055IMU.class, "imu");
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -42,7 +38,6 @@ abstract public class Robot extends LinearOpMode {
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-        parameters.maxWebcamAspectRatio = 640/480;
 
 
         //  Instantiate the Vuforia engine
@@ -52,8 +47,8 @@ abstract public class Robot extends LinearOpMode {
         imu.initialize();
 
         vuforiaStuff = new VuforiaStuff(vuforia);
-        //driveTrain = new DriveTrain(lf, rf, lr, rr);
-        //odometers = new Odometers(xOdom, yOdom);
+        driveTrain = new DriveTrain(lf, rf, lr, rr);
+        odometers = new Odometers(xOdom, yOdom);
 
         if (tfod != null) {
             tfod.activate();
@@ -63,30 +58,25 @@ abstract public class Robot extends LinearOpMode {
     }
 
     public void driveToPoint(double x, double y, double heading) {
-        PID pid = new PID(x, y, .006, .006, .005);
-
-        RoboPosition.currentXPos = odometers.getXPos();
-        RoboPosition.currentYPos = odometers.getYPOs();
-        double distanceToX = x - RoboPosition.currentXPos;
-        double distanceToY = y - RoboPosition.currentYPos;
-
-        double[] vector = pid.calcErrors(distanceToX, distanceToY);
+        double currentXPos;
+        double currentYPos;
+        currentXPos = odometers.getXPos();
+        currentYPos = odometers.getYPOs();
+        double distanceToX = x - currentXPos;
+        double distanceToY = y - currentYPos;
+        
         double lfPower;
         double rfPower;
         double lrPower;
         double rrPower;
-
-        //while (vector[0] != 0 && vector[1] != 0) {
+        
         while (Math.abs(distanceToX) > 200 || Math.abs(distanceToY) > 200 && opModeIsActive()) {
-            RoboPosition.currentXPos = odometers.getXPos();
-            RoboPosition.currentYPos = odometers.getYPOs();
-            RoboPosition.currentHeading = imu.readCurrentHeading();
+            currentXPos = odometers.getXPos();
+            currentYPos = odometers.getYPOs();
 
-            distanceToX = x - RoboPosition.currentXPos;
-            distanceToY = y - RoboPosition.currentYPos;
+            distanceToX = x - currentXPos;
+            distanceToY = y - currentYPos;
 
-            //vector = pid.calcErrors(distanceToX, distanceToY);
-            //double wheelPower = Math.hypot(vector[0], vector[1]);
             double wheelPower = .2;
 
             double angleRadians;

@@ -9,8 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class ServoTest extends OpMode {
 
     Servo servoL;
-    Servo servoR;
-
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -18,7 +16,7 @@ public class ServoTest extends OpMode {
 
     @Override
     public void init() {
-        servoL = hardwareMap.servo.get("sl");
+        servoL = hardwareMap.servo.get("ss");
     }
 
     @Override
@@ -38,3 +36,5 @@ public class ServoTest extends OpMode {
         telemetry.addData("Pos: ", pos);
     }
 }
+
+// .02 .34 .7 1
