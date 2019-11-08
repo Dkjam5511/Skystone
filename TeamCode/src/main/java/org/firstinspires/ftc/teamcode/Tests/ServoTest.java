@@ -5,10 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp (name = "Intake Servo Test", group = "Tests")
+@TeleOp (name = "Servo Test", group = "Tests")
 public class ServoTest extends OpMode {
 
     Servo servoL;
+    Servo servoR;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -17,6 +18,7 @@ public class ServoTest extends OpMode {
     @Override
     public void init() {
         servoL = hardwareMap.servo.get("ss");
+        servoR = hardwareMap.servo.get("hkr");
     }
 
     @Override

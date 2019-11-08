@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -35,6 +36,18 @@ public class IMU {
             currentHeading = 360 - currentHeading;
         }
         return currentHeading;
+    }
+
+    public double[] printAngles(){
+        double[] values;
+
+        values = new double[3];
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        values[0] = angles.firstAngle;
+        values[1] = angles.secondAngle;
+        values[2] = angles.thirdAngle;
+
+        return values;
     }
 
     public double headingAdjustment(double targetHeading){

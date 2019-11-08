@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Autonomous.RoboPosition;
-
 public class DriveTrain{
     DcMotor lf;
     DcMotor rf;
@@ -11,11 +9,6 @@ public class DriveTrain{
     DcMotor rr;
 
     public DriveTrain(DcMotor lf, DcMotor rf, DcMotor lr, DcMotor rr){
-        this.lf = lf;
-        this.rf = rf;
-        this.lr = lr;
-        this.rr = rr;
-
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
 
@@ -33,12 +26,17 @@ public class DriveTrain{
         rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        this.lf = lf;
+        this.rf = rf;
+        this.lr = lr;
+        this.rr = rr;
     }
 
     public void applyPower(double lfpower, double rfpower, double lrpower, double rrpower){
-        this.lf.setPower(lfpower);
-        this.rf.setPower(rfpower);
-        this.lr.setPower(lrpower);
-        this.rr.setPower(rrpower);
+        lf.setPower(lfpower);
+        rf.setPower(rfpower);
+        lr.setPower(lrpower);
+        rr.setPower(rrpower);
     }
 }

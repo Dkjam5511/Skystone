@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static android.graphics.Bitmap.createBitmap;
 import static android.graphics.Bitmap.createScaledBitmap;
 
 public class VuforiaStuff {
@@ -30,7 +31,7 @@ public class VuforiaStuff {
         LEFT, CENTER, RIGHT;
     }
 
-    public skystonePos vuforiascan() {
+    public skystonePos vuforiascan(boolean saveBitmaps, boolean red) {
         Image rgbImage = null;
         int rgbTries = 0;
         double colorcountL = 0;
@@ -65,85 +66,124 @@ public class VuforiaStuff {
             // copy the bitmap from the Vuforia frame
             Bitmap bitmap = Bitmap.createBitmap(rgbImage.getWidth(), rgbImage.getHeight(), Bitmap.Config.RGB_565);
             bitmap.copyPixelsFromBuffer(rgbImage.getPixels());
-/*
+
             String path = Environment.getExternalStorageDirectory().toString();
             FileOutputStream out = null;
-            try {
-                File file = new File(path, "Bitmap.png");
-                out = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
+
+            String bitmapName;
+            String croppedBitmapName;
+
+            if (red) {
+                bitmapName = "BitmapRED.png";
+                croppedBitmapName = "BitmapCroppedRED.png";
+            } else {
+                bitmapName = "BitmapBLUE.png";
+                croppedBitmapName = "BitmapCropped BLUE.png";
+            }
+
+            //Save bitmap to file
+            if (saveBitmaps) {
                 try {
-                    if (out != null) {
-                        out.flush();
-                        out.close();
-                    }
-                } catch (IOException e) {
+                    File file = new File(path, bitmapName);
+                    out = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.flush();
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-*/
-            bitmap = createScaledBitmap(bitmap, 320, 180, true);
-/*
-            try {
-                File file = new File(path, "BitmapCropped.png");
-                out = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
+
+            int cropStartX;
+            int cropStartY;
+            int cropWidth;
+            int cropHeight;
+
+            if (red) {
+                cropStartX = (int) ((370.0 / 1280.0) * bitmap.getWidth());
+                cropStartY = (int) ((130.0 / 720.0) * bitmap.getHeight());
+                cropWidth = (int) ((890.0 / 1280.0) * bitmap.getWidth());
+                cropHeight = (int) ((165.0 / 720.0) * bitmap.getHeight());
+            } else {
+                cropStartX = (int) ((120.0 / 720.0) * bitmap.getWidth());
+                cropStartY = (int) ((65.0 / 480.0) * bitmap.getHeight());
+                cropWidth = (int) ((520.0 / 720.0) * bitmap.getWidth());
+                cropHeight = (int) ((150.0 / 480.0) * bitmap.getHeight());
+            }
+
+            DbgLog.msg("10435 vuforiascan"
+                            + " cropStartX: " + cropStartX
+                            + " cropStartY: " + cropStartY
+                            + " cropWidth: " + cropWidth
+                            + " cropHeight: " + cropHeight
+                            + " Width: " + bitmap.getWidth()
+                            + " Height: " + bitmap.getHeight()
+                    );
+
+
+            bitmap = createBitmap(bitmap, cropStartX, cropStartY, cropWidth, cropHeight); //Cropped Bitmap to show only stones
+
+            // Save cropped bitmap to file
+            if (saveBitmaps) {
                 try {
-                    if (out != null) {
-                        out.flush();
-                        out.close();
-                    }
-                } catch (IOException e) {
+                    File file = new File(path, croppedBitmapName);
+                    out = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.flush();
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-*/
+            bitmap = createScaledBitmap(bitmap, 110, 20, true); //Compress bitmap to reduce scan time
+
+
             int height;
             int width;
             int pixel;
-            int r;
-            int g;
-            int b;
             int bitmapWidth = bitmap.getWidth();
             int bitmapHeight = bitmap.getHeight();
+            int colWidth = (int) ((double) bitmapWidth / 6.0);
+            int colorLStartCol = (int) ((double) bitmapWidth * (1.0 / 6.0) - ((double) colWidth / 2.0));
+            int colorCStartCol = (int) ((double) bitmapWidth * (3.0 / 6.0) - ((double) colWidth / 2.0));
+            int colorRStartCol = (int) ((double) bitmapWidth * (5.0 / 6.0) - ((double) colWidth / 2.0));
 
             for (height = 0; height < bitmapHeight; ++height) {
-                for (width = 0; width < (bitmapWidth / 3); ++width) {
+                for (width = colorLStartCol; width < colorLStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    r = Color.red(pixel);
-                    g = Color.green(pixel);
-                    b = Color.blue(pixel);
-                    colorcountL += Color.rgb(r, g, b);
+                    colorcountL += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
-                for (width = (bitmapWidth / 3); width < (bitmapWidth / 3) * 2; ++width) {
+                for (width = colorCStartCol; width < colorCStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    r = Color.red(pixel);
-                    g = Color.green(pixel);
-                    b = Color.blue(pixel);
-                    colorcountC += Color.rgb(r, g, b);
+                    colorcountC += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
 
-                for (width = (bitmapWidth / 3) * 2; width < bitmapWidth; ++width) {
+                for (width = colorRStartCol; width < colorRStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    r = Color.red(pixel);
-                    g = Color.green(pixel);
-                    b = Color.blue(pixel);
-                    colorcountR += Color.rgb(r, g, b);
+                    colorcountR += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
             }
         }
 
         skystonePos pos;
 
-        DbgLog.msg("color L: ", colorcountL);
-        DbgLog.msg("color C: ", colorcountC);
-        DbgLog.msg("color R: ", colorcountR);
+        DbgLog.msg("color L: " + Double.toString(colorcountL));
+        DbgLog.msg("color C: " + Double.toString(colorcountC));
+        DbgLog.msg("color R: " + Double.toString(colorcountR));
 
         if (colorcountL < colorcountC && colorcountL < colorcountR) {
             pos = skystonePos.LEFT;
