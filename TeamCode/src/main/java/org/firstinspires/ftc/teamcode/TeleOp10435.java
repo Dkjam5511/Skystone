@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "TeleOp", group = "TeleOp")
 public class TeleOp10435 extends OpMode {
-
     DcMotor lf;
     DcMotor rf;
     DcMotor lr;

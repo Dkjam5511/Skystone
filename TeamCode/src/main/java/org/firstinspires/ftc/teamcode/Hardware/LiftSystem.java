@@ -46,7 +46,7 @@ public class LiftSystem {
 
         ElapsedTime timeoutTimer = new ElapsedTime();
 
-        while (hLift.getCurrentPosition() < 2000 && timeoutTimer.seconds() < 2) {
+        while (hLift.getCurrentPosition() < 1750 && timeoutTimer.seconds() < 2) {
             hLift.setPower(1);
             DbgLog.msg("10435 hLiftTicks: " + hLift.getCurrentPosition());
             if (hLift.getCurrentPosition() > 1700) {

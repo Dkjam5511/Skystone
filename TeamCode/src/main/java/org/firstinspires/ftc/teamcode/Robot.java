@@ -68,8 +68,8 @@ abstract public class Robot extends LinearOpMode {
 
         stoneGrabber.setPosition(0);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
-        //hookL.setPosition(1);
-        //hookR.setPosition(0);
+        hookL.setPosition(GlobalPositions.HOOKL_UP);
+        hookR.setPosition(GlobalPositions.HOOKR_UP);
         capstonePost.setPosition(1);
 
         vuforiaStuff = new VuforiaStuff(vuforia);
@@ -275,5 +275,4 @@ abstract public class Robot extends LinearOpMode {
 
         return returnSpeed; //inches per second
     }
-
 }

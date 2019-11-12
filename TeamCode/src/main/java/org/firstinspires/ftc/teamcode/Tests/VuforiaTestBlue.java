@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Autonomous.VuforiaStuff;
 import org.firstinspires.ftc.teamcode.Robot;
 
-@Autonomous (name = "Vuforia Test Blue", group = "Tests")
+@Autonomous (name = "Vuforia Test B", group = "Tests")
 public class VuforiaTestBlue extends Robot {
 
     VuforiaStuff.skystonePos pos;
