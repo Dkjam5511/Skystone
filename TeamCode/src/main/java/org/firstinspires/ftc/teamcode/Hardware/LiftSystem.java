@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -9,73 +10,85 @@ import org.firstinspires.ftc.teamcode.DbgLog;
 import org.firstinspires.ftc.teamcode.GlobalPositions;
 
 public class LiftSystem {
-    DcMotor vLift;
-    public DcMotor hLift;
+    public CRServo hLift;
+    DcMotor hLiftEncoder;
     Servo stoneGrabber;
     Servo stoneSpinner;
 
-    public LiftSystem(DcMotor vLift, DcMotor hLift, Servo stoneGrabber, Servo stoneSpinner) {
-        vLift.setDirection(DcMotorSimple.Direction.REVERSE);
-        hLift.setDirection(DcMotorSimple.Direction.REVERSE);
+    public enum ExtensionState {
+        EXTENDING, RETRACTING, STOPPED
+    }
 
-        vLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        hLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    ElapsedTime timeoutTimer = new ElapsedTime();
 
-        hLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        vLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    public ExtensionState extensionState = ExtensionState.STOPPED;
+    public ExtensionState prevExtensionState = ExtensionState.STOPPED;
 
-        this.vLift = vLift;
+    public LiftSystem(CRServo hLift, DcMotor hLiftEncoder, Servo stoneGrabber, Servo stoneSpinner) {
+        hLiftEncoder.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        hLiftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        hLiftEncoder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         this.hLift = hLift;
+        this.hLiftEncoder = hLiftEncoder;
         this.stoneGrabber = stoneGrabber;
         this.stoneSpinner = stoneSpinner;
     }
 
+    public void runLift(){
+        if (prevExtensionState != extensionState){ //Checks if the state has changed
+            timeoutTimer.reset(); //Keeps track how long the state has been running for
+        }
+        prevExtensionState = extensionState;
+
+        switch (extensionState){
+            case EXTENDING:
+                extend();
+                break;
+            case RETRACTING:
+                retract();
+                break;
+            case STOPPED:
+                break;
+        }
+    }
+
     public void grabStone() {
-        stoneGrabber.setPosition(.56);
+        stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_DOWN);
     }
 
     public void dropStone() {
-        stoneGrabber.setPosition(0);
+        stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
     }
 
     public void extend() {
-
         DbgLog.msg("10435 hLift Extending");
 
-        ElapsedTime timeoutTimer = new ElapsedTime();
-
-        while (hLift.getCurrentPosition() < 1750 && timeoutTimer.seconds() < 2) {
-            hLift.setPower(1);
-            DbgLog.msg("10435 hLiftTicks: " + hLift.getCurrentPosition());
-            if (hLift.getCurrentPosition() > 1700) {
+        if (hLiftEncoder.getCurrentPosition() < 7000 && timeoutTimer.seconds() < 2) {
+            hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
+            DbgLog.msg("10435 hLiftTicks: " + hLiftEncoder.getCurrentPosition());
+            if (hLiftEncoder.getCurrentPosition() > 6000) {
                 stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
             }
+        } else {
+            hLift.setPower(0);
+            extensionState = ExtensionState.STOPPED;
         }
-        hLift.setPower(0);
-
     }
 
     public void retract() {
-        ElapsedTime timeoutTimer = new ElapsedTime();
-
-        while (hLift.getCurrentPosition() > 10) {
-            hLift.setPower(-1);
+        if (hLiftEncoder.getCurrentPosition() > 20 && timeoutTimer.seconds() < 2) {
+            hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED);
             stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
-            timeoutTimer.reset();
+        } else {
+            hLift.setPower(0);
+            extensionState = ExtensionState.STOPPED;
         }
-        while (timeoutTimer.seconds() < .5){
-            hLift.setPower(-1);
-        }
-
-        hLift.setPower(0);
-
 
     }
 
-    public void stopMotors(){
-        vLift.setPower(0);
+    public void stopMotors() {
         hLift.setPower(0);
     }
 

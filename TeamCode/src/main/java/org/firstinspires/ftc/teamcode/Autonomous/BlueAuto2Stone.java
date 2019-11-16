@@ -5,13 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.Hardware.LiftSystem;
 import org.firstinspires.ftc.teamcode.Robot;
 
-
-@Autonomous(name = "Blue Auto", group = "Autonomous")
-public class BlueMainAuto extends Robot {
+@Autonomous(name = "Blue Auto 2 Stone", group = "Autonomous")
+public class BlueAuto2Stone extends Robot {
 
     VuforiaStuff.skystonePos pos;
     int stoneDiff;
     final static double STANDARD_SPEED_MODIFIER = 12;
+    double pickupHeading = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -31,7 +31,7 @@ public class BlueMainAuto extends Robot {
             case RIGHT:
                 driveToPoint(10, 9, 0, 9);
                 driveToPoint(0, 33, 0, 9);
-                //driveToPoint2(10, 42, 0, 9, 4);
+                //driveToPoint2(7, 42, 0, 9, 6);
                 stoneDiff = 18;
                 break;
         }
@@ -43,25 +43,38 @@ public class BlueMainAuto extends Robot {
         liftSystem.grabStone();
         liftSystem.hLift.setPower(0);
         intake.off();
-        turn_to_heading(90, 0);
+        turn_to_heading(90, 50);  // put x inches in next statement to account for x encoder turning
         liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
-        driveToPoint(0, -64.5 - stoneDiff, 90, 11);
-        turn_to_heading(180, 0); // do the drop
+        driveToPoint(0, -65 - stoneDiff, 90, 11);
+        turn_to_heading(180, 50);
         grabbers.ready();
-        //liftSystem.extend();
-        driveToPoint(0, -10, 180, 10);
+        driveToPoint(0, -9, 180, 9);
         grabbers.down();
-        sleep(1000);
         liftSystem.dropStone();
-        sleep(500);
-        //liftSystem.retract();
-        liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
+        //sleep(500);  // was prior to lift system retracting, but moved retracting to after drive
         driveToPoint(0, 14, 180, 3);
+        liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
         turn_to_heading(95, 15);
-        driveToPoint(0, -14, 90, 2.4);
+        driveToPoint(0, -12, 90, 2.2);
         grabbers.up();
         sleep(200);
-        driveToPoint(0, 44, 90, 11);
+        if (pos == VuforiaStuff.skystonePos.RIGHT) {
+            driveToPoint(0, 44, 90, 11);
+        } else {
+            driveToPoint(2, 90 + stoneDiff, 90, 11);
+            intake.on();
+            liftSystem.hLift.setPower(-.3);
+            turn_to_heading(0, 40);
+            driveToPoint(0, 16, 0, 3.5);
+            driveToPoint(0, -16, 0, 9);
+            liftSystem.grabStone();
+            turn_to_heading(90, 50);  // put x inches in next statement to account for x encoder turning
+            liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
+            driveToPoint(-6, -(83 + stoneDiff), 90, 11);
+            liftSystem.dropStone();
+            liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
+            driveToPoint(7, 47, 90, 11);
+        }
         liftSystem.hLift.setPower(-.2);
         sleep(500);
         driveTrain.applyPower(0, 0, 0, 0);
