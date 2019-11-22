@@ -17,7 +17,7 @@ public class GlobalPositions {
     public static final double HLIFT_FORWARD_SPEED = .88;
     public static final double HLIFT_REVERSE_SPEED = -.92;
 
-    public static final double STONE_GRABBER_UP = .05;
+    public static final double STONE_GRABBER_UP = .12;
     public static final double STONE_GRABBER_DOWN = .56;
 
 }

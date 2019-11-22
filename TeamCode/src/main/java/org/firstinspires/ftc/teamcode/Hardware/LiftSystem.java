@@ -16,7 +16,7 @@ public class LiftSystem {
     Servo stoneSpinner;
 
     public enum ExtensionState {
-        EXTENDING, RETRACTING, STOPPED
+        EXTENDING, EXTENDINGFAR,RETRACTING, STOPPED
     }
 
     ElapsedTime timeoutTimer = new ElapsedTime();
@@ -43,8 +43,11 @@ public class LiftSystem {
         prevExtensionState = extensionState;
 
         switch (extensionState){
+            case EXTENDINGFAR:
+                extend(true);
+                break;
             case EXTENDING:
-                extend();
+                extend(false);
                 break;
             case RETRACTING:
                 retract();
@@ -62,10 +65,16 @@ public class LiftSystem {
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
     }
 
-    public void extend() {
+    public void extend(boolean far) {
         DbgLog.msg("10435 hLift Extending");
 
-        if (hLiftEncoder.getCurrentPosition() < 7000 && timeoutTimer.seconds() < 2) {
+        int ticksToExtend = 7000;
+
+        if (far){
+            ticksToExtend = 10000;
+        }
+
+        if (hLiftEncoder.getCurrentPosition() < ticksToExtend && timeoutTimer.seconds() < 2) {
             hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
             DbgLog.msg("10435 hLiftTicks: " + hLiftEncoder.getCurrentPosition());
             if (hLiftEncoder.getCurrentPosition() > 6000) {

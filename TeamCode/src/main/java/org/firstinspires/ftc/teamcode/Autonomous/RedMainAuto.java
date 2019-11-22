@@ -33,7 +33,7 @@ public class RedMainAuto extends Robot {
                 /*
                 driveToPoint2(-8, 42, 0, 9, 5);
                  */
-                stoneDiff = 18;
+                stoneDiff = 15;
                 break;
         }
         if (pos == VuforiaStuff.skystonePos.RIGHT) {

@@ -28,7 +28,7 @@ public class TeleOp10435 extends OpMode {
     int stoneLevel = 0;
     int reverse = 1;
     final static int stoneTickHeight = 500;
-    final static int firstStoneGap = 300;
+    final static int firstStoneGap = 350;
     int liftTargetTicks;
     int prevVLiftTicks;
     int vLiftSpeed;
@@ -88,9 +88,9 @@ public class TeleOp10435 extends OpMode {
 
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
-        vLift.setDirection(DcMotorSimple.Direction.REVERSE);
-        vLift2.setDirection(DcMotorSimple.Direction.REVERSE);
-        intakeL.setDirection(DcMotorSimple.Direction.REVERSE);
+        vLift.setDirection(DcMotor.Direction.REVERSE);
+        vLift2.setDirection(DcMotor.Direction.REVERSE);
+        intakeL.setDirection(DcMotor.Direction.REVERSE);
 
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -391,7 +391,7 @@ public class TeleOp10435 extends OpMode {
                         capstoneTimer.reset();
                     }
                 } else if (capstoneStage == 2){
-                    if (hLiftTicks > 6500) { // Move hLift to capstone position
+                    if (hLiftTicks > 6250) { // Move hLift to capstone position
                         if(capstoneTimer.seconds() > .5) {
                             hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED);
                         } else {

@@ -33,10 +33,18 @@ public class VuforiaStuff {
     public skystonePos vuforiascan(boolean saveBitmaps, boolean red) {
         Image rgbImage = null;
         int rgbTries = 0;
+        /*
         double colorcountL = 0;
         double colorcountC = 0;
         double colorcountR = 0;
+        */
+        double yellowCountL = 1;
+        double yellowCountC = 1;
+        double yellowCountR = 1;
 
+        double blackCountL = 1;
+        double blackCountC = 1;
+        double blackCountR = 1;
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         VuforiaLocalizer.CloseableFrame closeableFrame = null;
         this.vuforia.setFrameQueueCapacity(1);
@@ -77,7 +85,7 @@ public class VuforiaStuff {
                 croppedBitmapName = "BitmapCroppedRED.png";
             } else {
                 bitmapName = "BitmapBLUE.png";
-                croppedBitmapName = "BitmapCropped BLUE.png";
+                croppedBitmapName = "BitmapCroppedBLUE.png";
             }
 
             //Save bitmap to file
@@ -107,9 +115,9 @@ public class VuforiaStuff {
 
             if (red) {
                 cropStartX = (int) ((120.0 / 720.0) * bitmap.getWidth());
-                cropStartY = (int) ((65.0 / 480.0) * bitmap.getHeight());
-                cropWidth = (int) ((520.0 / 720.0) * bitmap.getWidth());
-                cropHeight = (int) ((150.0 / 480.0) * bitmap.getHeight());
+                cropStartY = (int) ((100.0 / 480.0) * bitmap.getHeight());
+                cropWidth = (int) ((590.0 / 720.0) * bitmap.getWidth());
+                cropHeight = (int) ((170.0 / 480.0) * bitmap.getHeight());
             } else {
                 cropStartX = (int) ((370.0 / 1280.0) * bitmap.getWidth());
                 cropStartY = (int) ((130.0 / 720.0) * bitmap.getHeight());
@@ -118,13 +126,13 @@ public class VuforiaStuff {
             }
 
             DbgLog.msg("10435 vuforiascan"
-                            + " cropStartX: " + cropStartX
-                            + " cropStartY: " + cropStartY
-                            + " cropWidth: " + cropWidth
-                            + " cropHeight: " + cropHeight
-                            + " Width: " + bitmap.getWidth()
-                            + " Height: " + bitmap.getHeight()
-                    );
+                    + " cropStartX: " + cropStartX
+                    + " cropStartY: " + cropStartY
+                    + " cropWidth: " + cropWidth
+                    + " cropHeight: " + cropHeight
+                    + " Width: " + bitmap.getWidth()
+                    + " Height: " + bitmap.getHeight()
+            );
 
 
             bitmap = createBitmap(bitmap, cropStartX, cropStartY, cropWidth, cropHeight); //Cropped Bitmap to show only stones
@@ -164,22 +172,64 @@ public class VuforiaStuff {
             for (height = 0; height < bitmapHeight; ++height) {
                 for (width = colorLStartCol; width < colorLStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    colorcountL += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
+                    if (Color.red(pixel) < 200 || Color.green(pixel) < 200 || Color.blue(pixel) < 200) {
+                        yellowCountL += Color.red(pixel);
+                        blackCountL += Color.blue(pixel);
+                    }
+
+                    /*
+                    if (Color.red(pixel) > 120 && Color.green(pixel) > 80 && Color.blue(pixel) < 20) {
+                        yellowCountL += 1;
+                    } else if (Color.red(pixel) < 120 && Color.green(pixel) < 120 && Color.blue(pixel) < 120) {
+                        blackCountL += 1;
+                    }
+                     */
+
+                    //colorcountL += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
                 for (width = colorCStartCol; width < colorCStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    colorcountC += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
+
+                    if (Color.red(pixel) < 200 || Color.green(pixel) < 200 || Color.blue(pixel) < 200) {
+                        yellowCountC += Color.red(pixel);
+                        blackCountC += Color.blue(pixel);
+                    }
+                    /*
+                    if (Color.red(pixel) > 120 && Color.green(pixel) > 80 && Color.blue(pixel) < 20) {
+                        yellowCountC += 1;
+                    } else if (Color.red(pixel) < 120 && Color.green(pixel) < 120 && Color.blue(pixel) < 120) {
+                        blackCountC += 1;
+                    }
+                    */
+                    //colorcountC += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
 
                 for (width = colorRStartCol; width < colorRStartCol + colWidth; ++width) {
                     pixel = bitmap.getPixel(width, height);
-                    colorcountR += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
+
+                    if (Color.red(pixel) < 200 || Color.green(pixel) < 200 || Color.blue(pixel) < 200) {
+                        yellowCountR += Color.red(pixel);
+                        blackCountR += Color.blue(pixel);
+                    }
+                    /*
+                    if (Color.red(pixel) > 120 && Color.green(pixel) > 80 && Color.blue(pixel) < 20) {
+                        yellowCountR += 1;
+                    } else if (Color.red(pixel) < 120 && Color.green(pixel) < 120 && Color.blue(pixel) < 120) {
+                        blackCountR += 1;
+                    }
+                    */
+                    //colorcountR += Color.red(pixel) + Color.green(pixel) + Color.blue(pixel);
                 }
             }
         }
 
-        skystonePos pos;
+        double blackYellowRatioL = blackCountL / yellowCountL;
+        double blackYellowRatioC = blackCountC / yellowCountC;
+        double blackYellowRatioR = blackCountR / yellowCountR;
 
+
+        skystonePos pos;
+        /*
         DbgLog.msg("color L: " + Double.toString(colorcountL));
         DbgLog.msg("color C: " + Double.toString(colorcountC));
         DbgLog.msg("color R: " + Double.toString(colorcountR));
@@ -191,6 +241,18 @@ public class VuforiaStuff {
         } else {
             pos = skystonePos.RIGHT;
         }
+*/
+        if (blackYellowRatioL > blackYellowRatioC && blackYellowRatioL > blackYellowRatioR) {
+            pos = skystonePos.LEFT;
+        } else if (blackYellowRatioC > blackYellowRatioL && blackYellowRatioC > blackYellowRatioR) {
+            pos = skystonePos.CENTER;
+        } else {
+            pos = skystonePos.RIGHT;
+        }
+
+        DbgLog.msg("black/yellow L: " + blackCountL + "/" + yellowCountL);
+        DbgLog.msg("black/yellow C: " + blackCountC + "/" + yellowCountC);
+        DbgLog.msg("black/yellow R: " + blackCountR + "/" + yellowCountR);
 
         return pos;
     }

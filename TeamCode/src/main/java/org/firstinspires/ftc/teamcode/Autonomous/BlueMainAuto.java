@@ -26,13 +26,13 @@ public class BlueMainAuto extends Robot {
                 break;
             case CENTER:
                 driveToPoint(2, 42, 0, 9);
-                stoneDiff = 12;
+                stoneDiff = 16;
                 break;
             case RIGHT:
                 driveToPoint(10, 9, 0, 9);
                 driveToPoint(0, 33, 0, 9);
                 //driveToPoint2(10, 42, 0, 9, 4);
-                stoneDiff = 18;
+                stoneDiff = 20;
                 break;
         }
         if (pos == VuforiaStuff.skystonePos.LEFT) {
