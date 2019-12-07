@@ -17,11 +17,6 @@ public class DriveTrain{
         lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         lr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

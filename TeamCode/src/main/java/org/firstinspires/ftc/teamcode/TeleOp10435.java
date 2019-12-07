@@ -28,7 +28,7 @@ public class TeleOp10435 extends OpMode {
     int stoneLevel = 0;
     int reverse = 1;
     final static int stoneTickHeight = 500;
-    final static int firstStoneGap = 350;
+    final static int firstStoneGap = 375;
     int liftTargetTicks;
     int prevVLiftTicks;
     int vLiftSpeed;
@@ -77,7 +77,7 @@ public class TeleOp10435 extends OpMode {
         intakeR = hardwareMap.dcMotor.get("ir");
         vLift = hardwareMap.dcMotor.get("vl");
         vLift2 = hardwareMap.dcMotor.get("vl2");
-        hLiftEncoder = hardwareMap.dcMotor.get("vl2");
+        hLiftEncoder = hardwareMap.dcMotor.get("il");
         hLift = hardwareMap.crservo.get("hl");
         stoneGrabber = hardwareMap.servo.get("sg");
         stoneSpinner = hardwareMap.servo.get("ss");
@@ -98,15 +98,16 @@ public class TeleOp10435 extends OpMode {
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        vLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intakeL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
         hookL.setPosition(GlobalPositions.HOOKL_UP);
         hookR.setPosition(GlobalPositions.HOOKR_UP);
-        capstonePost.setPosition(1);
+        capstonePost.setPosition(0);
 
     }
 
@@ -297,6 +298,10 @@ public class TeleOp10435 extends OpMode {
             hookR.setPosition(GlobalPositions.HOOKR_READY);
         }
 
+        if (gamepad1.start){
+            capstonePost.setPosition(0);
+        }
+
         if (stoneLevel > 9) {
             stoneLevel = 9;
         }
@@ -373,25 +378,25 @@ public class TeleOp10435 extends OpMode {
         if (extending) {
             hAtIntakePos = false;
 
-            if (hLiftTicks < 6000 && !deployingCapstone) {
+            if (hLiftTicks < 7000 && !deployingCapstone) {
                 hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
-                if (hLiftTicks > 5000) {
+                if (hLiftTicks > 6500) {
                     stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
                 }
             } else if (deployingCapstone) {
                 if (capstoneStage == 1){
-                    if (hLiftTicks < 7500){ // Extend Out hLift
+                    if (hLiftTicks < 8000){ // Extend Out hLift
                         hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
                     } else {
                         capstoneStage = 2;
                     }
-                    if (hLiftTicks > 7000) {
+                    if (hLiftTicks > 7500) {
                         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_CAPSTONE); // Once hlift is extended a certain ammount move servos into place
-                        capstonePost.setPosition(.5);
+                        capstonePost.setPosition(1);
                         capstoneTimer.reset();
                     }
                 } else if (capstoneStage == 2){
-                    if (hLiftTicks > 6250) { // Move hLift to capstone position
+                    if (hLiftTicks > 7000) { // Move hLift to capstone position
                         if(capstoneTimer.seconds() > .5) {
                             hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED);
                         } else {

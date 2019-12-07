@@ -10,6 +10,10 @@ public class AutoTest extends Robot {
     public void runOpMode() throws InterruptedException {
         roboInit();
 
+        driveTrain.applyPower(.5,.5,.5,.5);
+        sleep(2500);
+        driveTrain.applyPower(0,0,0,0);
+
         /*
         driveToPoint3(-10, 37,0, 1, 3.5 );
         sleep(2000);
@@ -28,10 +32,6 @@ public class AutoTest extends Robot {
         driveToPoint3(0,50,0, 1);
         */
 
-        turn_to_heading2(90, 0, 0,0);
-        sleep(3000);
-        turn_to_heading2(0, 0, 0,0);
-        sleep(4000);
 
         //driveToPoint3(7.5,-1,90, .7,1);
         //driveToPoint3(0, -(68 ), 90, 1, 1);
@@ -57,9 +57,5 @@ public class AutoTest extends Robot {
         driveToPoint(0, -15,315,9);
         driveToPoint(0,-70,0,9);
  */
-        liftSystem.stopMotors();
-        intake.off();
-        driveTrain.applyPower(0,0,0,0);
-
     }
 }

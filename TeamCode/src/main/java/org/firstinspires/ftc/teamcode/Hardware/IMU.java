@@ -27,13 +27,16 @@ public class IMU {
     }
 
     public double readCurrentHeading() {
+
+
+
         double currentHeading;
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        currentHeading = angles.firstAngle;
-        if (currentHeading < 0) {
-            currentHeading = -currentHeading;
-        } else {
+        currentHeading = angles.firstAngle; //Because REV Hub is upside down
+        if (currentHeading > 0) {
             currentHeading = 360 - currentHeading;
+        } else {
+            currentHeading = -currentHeading;
         }
         return currentHeading;
     }

@@ -17,8 +17,8 @@ public class ServoTest extends OpMode {
 
     @Override
     public void init() {
-        servoL = hardwareMap.servo.get("ss");
-        servoR = hardwareMap.servo.get("hkr");
+        servoL = hardwareMap.servo.get("cp");
+        servoR = hardwareMap.servo.get("ss");
     }
 
     @Override
@@ -33,7 +33,8 @@ public class ServoTest extends OpMode {
             timer.reset();
         }
 
-        servoL.setPosition(pos);
+        servoL.setPosition(1);
+        servoR.setPosition(pos);
 
         telemetry.addData("Pos: ", pos);
     }
