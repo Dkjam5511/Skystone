@@ -34,9 +34,9 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.encoderTicksTo
  * Note: this could be optimized significantly with REV bulk reads
  */
 @Config
-public class StandardTrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
+public class TwoWheelLocalizer extends TwoTrackingWheelLocalizer {
     public static double TICKS_PER_REV = 2400;
-    public static double WHEEL_RADIUS = 2.3622/2; // in
+    public static double WHEEL_RADIUS = (2.3622/2); // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
     public static double LATERAL_DISTANCE = 10; // in; distance between the left and right wheels
@@ -46,10 +46,10 @@ public class StandardTrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
     private ExpansionHubEx hub, hub2;
     private BNO055IMU imu;
 
-    public StandardTrackingWheelLocalizer(HardwareMap hardwareMap, BNO055IMU imu) {
+    public TwoWheelLocalizer(HardwareMap hardwareMap, BNO055IMU imu) {
         super(Arrays.asList(
-                new Pose2d(.75, -5.5, 0), // yOdom
-                new Pose2d(-1, 4.75, Math.toRadians(90)) // xOdom
+                new Pose2d(-5.5, -.75, 0), // yOdom
+                new Pose2d(4.75, 1, Math.toRadians(90)) // xOdom
         ));
 
         this.imu = imu;
@@ -75,8 +75,8 @@ public class StandardTrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
         RevBulkData bulkData2 = hub2.getBulkInputData();
 
         return Arrays.asList(
-                encoderTicksToInches(bulkData.getMotorCurrentPosition(xOdom)),
-                encoderTicksToInches(bulkData2.getMotorCurrentPosition(yOdom))
+                encoderTicksToInches(bulkData2.getMotorCurrentPosition(yOdom)),
+                encoderTicksToInches(bulkData.getMotorCurrentPosition(xOdom))
         );
     }
 
@@ -86,14 +86,14 @@ public class StandardTrackingWheelLocalizer extends TwoTrackingWheelLocalizer {
         RevBulkData bulkData2 = hub2.getBulkInputData();
 
         return Arrays.asList(
-                encoderTicksToInches(bulkData.getMotorVelocity(xOdom)),
-                encoderTicksToInches(bulkData2.getMotorVelocity(yOdom))
+                encoderTicksToInches(bulkData2.getMotorVelocity(yOdom)),
+                encoderTicksToInches(bulkData.getMotorVelocity(xOdom))
         );
 
     }
 
     @Override
     public double getHeading() {
-        return imu.getAngularOrientation().firstAngle;
+        return -imu.getAngularOrientation().firstAngle;
     }
 }

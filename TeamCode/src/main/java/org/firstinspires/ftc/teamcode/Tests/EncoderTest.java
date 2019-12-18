@@ -5,26 +5,26 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Hardware.Odometers;
+import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
 
-@TeleOp (name = "Encoder Test", group = "Tests")
+import java.util.List;
+
+@TeleOp(name = "Encoder Test", group = "Tests")
 public class EncoderTest extends OpMode {
-    DcMotor encoderMotor;
-    DcMotor encoderMotor1;
 
-    Odometers odometers;
+    SampleMecanumDriveREVOptimized drive;
 
     @Override
     public void init() {
-        encoderMotor = hardwareMap.dcMotor.get("ir");
-        encoderMotor1 = hardwareMap.dcMotor.get("il");
-
-        odometers = new Odometers(encoderMotor, encoderMotor1);
+        drive = new SampleMecanumDriveREVOptimized(hardwareMap);
     }
 
     @Override
     public void loop() {
-        telemetry.addData("Encoder Value X:", odometers.getXPos());
-        telemetry.addData("Encoder Value Y:", odometers.getYPos());
+        List<Double> pos = drive.getWheelPositions();
 
+        telemetry.addData("Left: ", pos.get(0));
+        telemetry.addData("Right: ", pos.get(1));
+        telemetry.addData("Center: ", pos.get(2));
     }
 }

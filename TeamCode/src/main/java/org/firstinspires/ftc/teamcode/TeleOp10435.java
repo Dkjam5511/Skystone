@@ -302,8 +302,8 @@ public class TeleOp10435 extends OpMode {
             capstonePost.setPosition(0);
         }
 
-        if (stoneLevel > 9) {
-            stoneLevel = 9;
+        if (stoneLevel > 8) {
+            stoneLevel = 8;
         }
 
         if (stoneLevel < 0) {

@@ -12,7 +12,7 @@ public class BlueAuto2Stone extends Robot {
     double stoneDiff;
     double stoneDiff2;
 
-    double driftAdjustment = 2;
+    double driftAdjustment = 3;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -49,13 +49,13 @@ public class BlueAuto2Stone extends Robot {
         turn_to_heading(180, -25); // was 50
         liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDINGFAR;
         grabbers.ready();
-        driveToPoint3(0, -9, 180, .5, 0);
+        driveToPoint3(0, -11, 180, .4, 0);
         grabbers.down();
         sleep(300);
-        driveToPoint(0, 15, 180, 3);
+        driveToPoint(0, 16, 180, 3);
         turn_to_heading(95, 15);
         liftSystem.dropStone();
-        driveToPoint(0, -14, 90, 2.0);
+        driveToPoint(0, -6, 90, 2.0);
         liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
         grabbers.up();
         sleep(200);
@@ -75,16 +75,16 @@ public class BlueAuto2Stone extends Robot {
             liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
             driveToPoint3(0, 43, 90 + driftAdjustment, 1, 1);
         } else {
-            driveToPoint3(0, 94 + stoneDiff2, 90, 1, 0);
+            driveToPoint3(0, 95 + stoneDiff2, 90, 1, 0);
             intake.on();
             liftSystem.hLift.setPower(-.3);
             turn_to_heading(0, -25);
             driveToPoint3(0, 19, 0, .35, 0);
-            driveToPoint3(0, -21, 0, .8, 0);
+            driveToPoint3(0, -20, 0, .8, 0);
             liftSystem.grabStone();
-            turn_to_heading(90 + driftAdjustment, -25);
+            turn_to_heading(90, -25);
             liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
-            driveToPoint3(0, -(95 + stoneDiff2), 90, 1, 0);
+            driveToPoint3(0, -(92 + stoneDiff2), 90, 1, 0);
             liftSystem.dropStone();
             liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
             driveToPoint3(0, 43, 90 + driftAdjustment, 1, 1);

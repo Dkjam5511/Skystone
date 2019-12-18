@@ -12,7 +12,7 @@ public class RedAuto2Stone extends Robot {
     int stoneDiff;
     int stoneDiff2;
 
-    double driftAdjustment = 3;
+    double driftAdjustment = 4;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -49,10 +49,10 @@ public class RedAuto2Stone extends Robot {
         turn_to_heading(180 + driftAdjustment, -25);
         liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDINGFAR;
         grabbers.ready();
-        driveToPoint3(0, -9, 180, .5, 0);
+        driveToPoint3(0, -9, 180, .4, 0);
         grabbers.down();
         sleep(300);
-        driveToPoint(0, 15, 180 + driftAdjustment, 3);
+        driveToPoint(0, 16, 180 + driftAdjustment, 3);
         turn_to_heading(265, 15);
         liftSystem.dropStone();
         driveToPoint(0, -10, 270, 2.0);
@@ -60,12 +60,12 @@ public class RedAuto2Stone extends Robot {
         grabbers.up();
         sleep(200);
         if (pos == VuforiaStuff.skystonePos.LEFT) {
-            driveToPoint3(0, 84 + stoneDiff2, 270, 1, 0);
+            driveToPoint3(0, 84 + stoneDiff2, 270 + driftAdjustment, 1, 0);
             intake.on();
             liftSystem.hLift.setPower(-.3);
             turn_to_heading(315, -60);
             driveToPoint3(12, 12, 315, .4, 1);
-            driveToPoint3(0, -21, 315, .8, 0);
+            driveToPoint3(0, -22, 315, .8, 0);
             liftSystem.grabStone();
             turn_to_heading(270 + driftAdjustment, -60);
             liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
@@ -74,12 +74,12 @@ public class RedAuto2Stone extends Robot {
             liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
             driveToPoint3(3, 40, 270 + driftAdjustment, 1, 1);
         } else {
-            driveToPoint3(0, 92 + stoneDiff2, 270, 1,0);
+            driveToPoint3(0, 92 + stoneDiff2, 270 + driftAdjustment, 1,0);
             intake.on();
             liftSystem.hLift.setPower(-.3);
             turn_to_heading(0, -25);
-            driveToPoint3(0, 19, 0, .35, 0);
-            driveToPoint3(0, -20, 0, .8, 0);
+            driveToPoint3(0, 20, 0, .35, 0);
+            driveToPoint3(0, -22, 0, .8, 0);
             liftSystem.grabStone();
             turn_to_heading(270 + driftAdjustment, -25);
             liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
