@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
-
+//This was an expiriment that we never used cuz roadrunner=good, this=bad
 public class PID {
 
     //Figure out how to make it all in PID, vector should be combined anyway

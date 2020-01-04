@@ -21,7 +21,7 @@ public class IMU {
         BNO055IMU.Parameters IMUParameters = new BNO055IMU.Parameters();
         IMUParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         IMUParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        IMUParameters.calibrationDataFile = "BNO055IMUCalibration.json";
+        IMUParameters.calibrationDataFile = "AdafruitIMUCalibration.json";
 
         imu.initialize(IMUParameters);
     }

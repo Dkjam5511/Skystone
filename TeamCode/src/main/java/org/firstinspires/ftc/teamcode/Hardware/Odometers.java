@@ -3,23 +3,29 @@ package org.firstinspires.ftc.teamcode.Hardware;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Odometers {
-    public DcMotor xOdom;
-    public DcMotor yOdom;
+    public DcMotor frontEncoder;
+    public DcMotor leftEncoder;
+    public DcMotor rightEncoder;
 
-    public Odometers(DcMotor xOdom, DcMotor yOdom) {
-        xOdom.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        yOdom.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    public Odometers(DcMotor frontEncoder, DcMotor leftEncoder, DcMotor rightEncoder) {
+        frontEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        this.xOdom = xOdom;
-        this.yOdom = yOdom;
+        frontEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        this.frontEncoder = frontEncoder;
+        this.leftEncoder = leftEncoder;
+        this.rightEncoder = rightEncoder;
     }
 
     public double getXPos() {
-        return xOdom.getCurrentPosition();
+        return frontEncoder.getCurrentPosition();
     }
 
     public double getYPos() {
-        return yOdom.getCurrentPosition(); //No negative because IntakeL is reversed
+        return (-rightEncoder.getCurrentPosition() + leftEncoder.getCurrentPosition())/2; //No negative because IntakeL is reversed
     }
 }

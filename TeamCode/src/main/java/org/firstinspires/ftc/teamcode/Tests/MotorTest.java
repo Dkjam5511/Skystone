@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.Tests;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp (name = "Motor Test", group = "Tests")
@@ -26,19 +27,23 @@ public class MotorTest extends OpMode {
 
     @Override
     public void init() {
-        motor1 = hardwareMap.dcMotor.get("1");
-        motor2 = hardwareMap.dcMotor.get("2");
+        motor1 = hardwareMap.dcMotor.get("vl");
+        motor2 = hardwareMap.dcMotor.get("vl2");
+
+        motor2.setDirection(DcMotor.Direction.REVERSE);
 
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         timer.reset();
     }
 
     @Override
     public void loop() {
-        motor1.setPower(1);
-        motor2.setPower(1);
+        motor1.setPower(gamepad1.left_stick_y);
+        motor2.setPower(gamepad1.left_stick_y);
 
         if (timer.seconds() > 1){
             motor1pos = motor1.getCurrentPosition();

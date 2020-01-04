@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.provider.Settings;
+
+import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -18,8 +22,7 @@ public class TeleOp10435 extends OpMode {
     DcMotor intakeR;
     DcMotor vLift;
     DcMotor vLift2;
-    DcMotor hLiftEncoder;
-    CRServo hLift;
+    Servo hLift;
     Servo stoneGrabber;
     Servo stoneSpinner;
     Servo hookL;
@@ -27,8 +30,8 @@ public class TeleOp10435 extends OpMode {
     Servo capstonePost;
     int stoneLevel = 0;
     int reverse = 1;
-    final static int stoneTickHeight = 500;
-    final static int firstStoneGap = 375;
+    final static int stoneTickHeight = 110;
+    final static int firstStoneGap = 50;
     int liftTargetTicks;
     int prevVLiftTicks;
     int vLiftSpeed;
@@ -38,7 +41,11 @@ public class TeleOp10435 extends OpMode {
     int hLiftTicks;
     int vTickCorrection;
     int hTickCorrection;
+    int extraLiftSauce = 0;
     int capstoneStage = 1;
+    double hLiftPos = 0;
+    double powerCorrection;
+    double liftStickPower;
     boolean lifting = false;
     boolean vManualLift = false;
     boolean hManualLift = false;
@@ -64,8 +71,9 @@ public class TeleOp10435 extends OpMode {
     ElapsedTime upTimer = new ElapsedTime();
     ElapsedTime dropTimer = new ElapsedTime();
     ElapsedTime vLiftSpeedTimer = new ElapsedTime();
-    ElapsedTime hLiftSpeedTimer = new ElapsedTime();
-    ElapsedTime capstoneTimer = new ElapsedTime();
+    ElapsedTime hLiftTimer = new ElapsedTime();
+    ElapsedTime liftSlamTimer = new ElapsedTime();
+    ElapsedTime liftManualTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -77,8 +85,7 @@ public class TeleOp10435 extends OpMode {
         intakeR = hardwareMap.dcMotor.get("ir");
         vLift = hardwareMap.dcMotor.get("vl");
         vLift2 = hardwareMap.dcMotor.get("vl2");
-        hLiftEncoder = hardwareMap.dcMotor.get("il");
-        hLift = hardwareMap.crservo.get("hl");
+        hLift = hardwareMap.servo.get("hl");
         stoneGrabber = hardwareMap.servo.get("sg");
         stoneSpinner = hardwareMap.servo.get("ss");
         hookL = hardwareMap.servo.get("hkl");
@@ -88,7 +95,6 @@ public class TeleOp10435 extends OpMode {
 
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
-        vLift.setDirection(DcMotor.Direction.REVERSE);
         vLift2.setDirection(DcMotor.Direction.REVERSE);
         intakeL.setDirection(DcMotor.Direction.REVERSE);
 
@@ -98,16 +104,18 @@ public class TeleOp10435 extends OpMode {
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         vLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        intakeL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intakeL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        vLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        vLift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
         hookL.setPosition(GlobalPositions.HOOKL_UP);
         hookR.setPosition(GlobalPositions.HOOKR_UP);
-        capstonePost.setPosition(0);
+        capstonePost.setPosition(GlobalPositions.CAPSTONE_START);
 
     }
 
@@ -273,11 +281,13 @@ public class TeleOp10435 extends OpMode {
 
         if (gamepad2.start) {
             extending = true;
+            hLiftTimer.reset();
             deployingCapstone = false;
         }
 
         if (gamepad2.back) {
             extending = true;
+            hLiftTimer.reset();
             deployingCapstone = true;
         }
 
@@ -293,17 +303,17 @@ public class TeleOp10435 extends OpMode {
             bTimer2.reset();
         }
 
-        if (gamepad1.y){
+        if (gamepad1.y) {
             hookL.setPosition(GlobalPositions.HOOKL_READY);
             hookR.setPosition(GlobalPositions.HOOKR_READY);
         }
 
-        if (gamepad1.start){
-            capstonePost.setPosition(0);
+        if (gamepad1.start) {
+            capstonePost.setPosition(GlobalPositions.CAPSTONE_START);
         }
 
-        if (stoneLevel > 8) {
-            stoneLevel = 8;
+        if (stoneLevel > 11) {
+            stoneLevel = 11;
         }
 
         if (stoneLevel < 0) {
@@ -314,44 +324,74 @@ public class TeleOp10435 extends OpMode {
         vLiftTicks = vLift.getCurrentPosition() - vTickCorrection;
 
         if (stoneLevel > 0) {
-            liftTargetTicks = stoneLevel * stoneTickHeight + firstStoneGap;
+            liftTargetTicks = stoneLevel * stoneTickHeight + firstStoneGap + extraLiftSauce;
         } else {
             liftTargetTicks = 0;
         }
         if (lifting) {
             vAtIntakePos = false;
 
-            if (Math.abs(gamepad2.left_stick_y) > .1) {
+            if (Math.abs(gamepad2.left_stick_y) > .03) {
                 vManualLift = true;
             }
 
             if (vManualLift) {
-                if (releasing && vLiftTicks < stoneLevel * stoneTickHeight + 300) {
+                if (releasing && vLiftTicks < liftTargetTicks + 30) {
                     if (dropTimer.seconds() > .25) {
+                        extraLiftSauce = 30;
                         vLift.setPower(1);
                         vLift2.setPower(1);
                     }
                 } else {
                     releasing = false;
-                    vLift.setPower(-gamepad2.left_stick_y);
-                    vLift2.setPower(-gamepad2.left_stick_y);
+                    if (Math.abs(gamepad2.left_stick_y) > .03){
+                        liftStickPower = gamepad2.left_stick_y;
+
+                        if (liftStickPower > 0){
+                            liftStickPower = liftStickPower + .2;
+                            if (vLiftFirstRun) {
+                                prevVLiftTicks = vLiftTicks;
+                                vLiftSpeedTimer.reset();
+                            } else if (vLiftSpeedTimer.seconds() > .1) {
+                                vLiftSpeed = vLiftTicks - prevVLiftTicks;
+                                prevVLiftTicks = vLiftTicks;
+                                vLiftSpeedTimer.reset();
+                            }
+                            if (Math.abs(vLiftSpeed) > 1){
+                                liftStickPower = liftStickPower*.6;
+                            }
+                        }
+
+                        vLift.setPower(-liftStickPower);
+                        vLift2.setPower(-liftStickPower);
+                    } else {
+                        vLift.setPower(.01);
+                        vLift2.setPower(.01);
+                    }
                 }
             } else {
-                if (vLiftTicks < liftTargetTicks - 100) {
-                    vLift.setPower(1);
-                    vLift2.setPower(1);
-                } else if (vLiftTicks > liftTargetTicks + 100) {
-                    vLift.setPower(-1);
-                    vLift2.setPower(-1);
+                powerCorrection = (Math.pow((Math.abs(liftTargetTicks - vLiftTicks) + 5) / 15, 2) + 3) / 100;
+
+                if (vLiftTicks < liftTargetTicks - 10) {
+                    vLift.setPower(powerCorrection);
+                    vLift2.setPower(powerCorrection);
+                } else if (vLiftTicks > liftTargetTicks + 10) {
+                    vLift.setPower(-powerCorrection/2);
+                    vLift2.setPower(-powerCorrection/2);
                 } else {
-                    vLift.setPower(0);
-                    vLift2.setPower(0);
+                    vLift.setPower(.01);
+                    vLift2.setPower(.01);
                 }
             }
         } else {
-            if (vLiftTicks > 60 && !vAtIntakePos) {
-                vLift.setPower(-1);
-                vLift2.setPower(-1);
+            if (vLiftTicks > 10 && !vAtIntakePos) {
+                if (vLiftTicks > 7 * stoneTickHeight + firstStoneGap){
+                    vLift.setPower(-1);
+                    vLift2.setPower(-1);
+                }else {
+                    vLift.setPower(-.8);
+                    vLift2.setPower(-.8);
+                }
                 if (vLiftFirstRun) {
                     prevVLiftTicks = vLiftTicks;
                     vLiftSpeedTimer.reset();
@@ -359,20 +399,66 @@ public class TeleOp10435 extends OpMode {
                     vLiftSpeed = vLiftTicks - prevVLiftTicks;
                     prevVLiftTicks = vLiftTicks;
                     vLiftSpeedTimer.reset();
-                    if (vLiftSpeed > -20) {
+                    if (vLiftSpeed == 0) {
                         vAtIntakePos = true;
-                        vTickCorrection = vLift.getCurrentPosition();
                     }
                 }
                 vLiftFirstRun = false;
+                liftSlamTimer.reset();
+
             } else {
                 vAtIntakePos = true;
-                vLift.setPower(0);
-                vLift2.setPower(0);
+                extraLiftSauce = 0;
+                if (liftSlamTimer.seconds() < .5) {
+                    vLift.setPower(-1);
+                    vLift2.setPower(-1);
+                } else {
+                    vLift.setPower(0);
+                    vLift2.setPower(0);
+                    vTickCorrection = vLift.getCurrentPosition();
+                }
             }
+
         }
 
         //Horizontal Lift
+        if (extending) {
+            if (hLiftTimer.seconds() < .75) {
+                if (deployingCapstone) {
+                    hLift.setPosition(1);
+                    hLiftPos = 1;
+                } else {
+                    hLift.setPosition(.8);
+                    hLiftPos = .8;
+                }
+            } else if (hLiftTimer.seconds() < 1.25 && deployingCapstone){
+                stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_CAPSTONE);
+                hLift.setPosition(.6);
+                hLiftPos = .6;
+                capstonePost.setPosition(1);
+            } else{
+                extending = false;
+            }
+        } else if (retracting) {
+            hLift.setPosition(GlobalPositions.MIN_HLIFT_POS);
+            hLiftPos = GlobalPositions.MIN_HLIFT_POS;
+            retracting = false;
+            hAtIntakePos = true;
+        } else {
+            hLiftPos += -gamepad2.right_stick_y / 100;
+
+            if (hLiftPos > GlobalPositions.MAX_HLIFT_POS){
+                hLiftPos = GlobalPositions.MAX_HLIFT_POS;
+            }
+            if (hLiftPos < GlobalPositions.MIN_HLIFT_POS) {
+                hLiftPos = GlobalPositions.MIN_HLIFT_POS;
+            }
+            hLift.setPosition(hLiftPos);
+        }
+
+
+        /*
+        Old horizontal Lift
         hLiftTicks = hLiftEncoder.getCurrentPosition() - hTickCorrection;
 
         if (extending) {
@@ -443,14 +529,15 @@ public class TeleOp10435 extends OpMode {
             deployingCapstone = false;
             capstoneStage = 1;
         }
-
+*/
         telemetry.addData("Stone Level: ", stoneLevel);
         telemetry.addData("VLift Encoder: ", vLiftTicks);
-        telemetry.addData("HLift Encoder: ", hLiftTicks);
-        telemetry.addData("hLiftSpeed: ", hLiftSpeed);
-        telemetry.addData(" Vertical AtIntakePos", vAtIntakePos);
-        telemetry.addData(" Horizontal AtIntakePos", hAtIntakePos);
-        telemetry.addData("hTickCorrection", hTickCorrection);
+        telemetry.addData("VLift Target: ", liftTargetTicks);
+        telemetry.addData("VLift Tick Correction", vTickCorrection);
+        telemetry.addData("VLift Stick Power", liftStickPower);
+        telemetry.addData("Power Correction", powerCorrection);
+        telemetry.addData("Manual Lift Mode", vManualLift);
+        telemetry.addData("VLift Speed", vLiftSpeed);
         telemetry.update();
     }
 }

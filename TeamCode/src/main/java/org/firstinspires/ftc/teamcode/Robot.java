@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -40,23 +39,23 @@ abstract public class Robot extends LinearOpMode {
     boolean gsFirstRun = true;
     ElapsedTime gsSpeedTimer = new ElapsedTime();
 
-    SampleMecanumDriveBase drive;
+    public SampleMecanumDriveBase drive;
 
     public void roboInit() {
-        ExpansionHubMotor lf = hardwareMap.get(ExpansionHubMotor.class, "lf");
-        ExpansionHubMotor lr = hardwareMap.get(ExpansionHubMotor.class, "lr");
-        ExpansionHubMotor rr = hardwareMap.get(ExpansionHubMotor.class, "rr");
-        ExpansionHubMotor rf = hardwareMap.get(ExpansionHubMotor.class, "rf");
+        DcMotor lf = hardwareMap.dcMotor.get("lf");
+        DcMotor lr = hardwareMap.dcMotor.get("lr");
+        DcMotor rf = hardwareMap.dcMotor.get("rf");
+        DcMotor rr = hardwareMap.dcMotor.get("rr");
         DcMotor intakeL = hardwareMap.dcMotor.get("il");
         DcMotor intakeR = hardwareMap.dcMotor.get("ir");
-        DcMotor hLiftEncoder = hardwareMap.dcMotor.get("il");
-        CRServo hLift = hardwareMap.crservo.get("hl");
+        Servo hLift = hardwareMap.servo.get("hl");
         Servo stoneGrabber = hardwareMap.servo.get("sg");
         Servo stoneSpinner = hardwareMap.servo.get("ss");
         Servo hookL = hardwareMap.servo.get("hkl");
         Servo hookR = hardwareMap.servo.get("hkr");
-        ExpansionHubMotor xOdom = hardwareMap.get(ExpansionHubMotor.class, "ir");
-        ExpansionHubMotor yOdom = hardwareMap.get(ExpansionHubMotor.class,"vl2");
+        ExpansionHubMotor leftEncoder = hardwareMap.get(ExpansionHubMotor.class, "il");
+        ExpansionHubMotor rightEncoder = hardwareMap.get(ExpansionHubMotor.class, "ir");
+        ExpansionHubMotor frontEncoder = hardwareMap.get(ExpansionHubMotor.class,"rr");
         Servo capstonePost = hardwareMap.servo.get("cp");
 
         gyro = hardwareMap.get(BNO055IMU.class, "imu");
@@ -79,14 +78,14 @@ abstract public class Robot extends LinearOpMode {
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
         hookL.setPosition(GlobalPositions.HOOKL_UP);
         hookR.setPosition(GlobalPositions.HOOKR_UP);
-        capstonePost.setPosition(0);
+        capstonePost.setPosition(GlobalPositions.CAPSTONE_START);
 
         vuforiaStuff = new VuforiaStuff(vuforia);
         driveTrain = new DriveTrain(lf, rf, lr, rr);
         intake = new Intake(intakeL, intakeR);
         grabbers = new FoundationGrabbers(hookL, hookR);
-        odometers = new Odometers(xOdom, yOdom);
-        liftSystem = new LiftSystem(hLift, hLiftEncoder, stoneGrabber, stoneSpinner);
+        odometers = new Odometers(frontEncoder, leftEncoder, rightEncoder);
+        liftSystem = new LiftSystem(hLift, stoneGrabber, stoneSpinner);
         grabbers.up();
 
         waitForStart();
@@ -141,7 +140,7 @@ abstract public class Robot extends LinearOpMode {
                         + " Distance remaining:" + Double.toString(distanceRemaining)
         );
 
-        while ((distanceRemaining > 1 || currentSpeed > 3) && opModeIsActive() && timeoutTimer.seconds() < 1) {
+        while ((distanceRemaining > 1 || currentSpeed > 3) && opModeIsActive() && timeoutTimer.seconds() < .75) {
 
             liftSystem.runLift();
 
@@ -693,10 +692,6 @@ abstract public class Robot extends LinearOpMode {
         telemetry.update();
 
     } // end of turn_to_heading2
-
-    public void turnToHeadingRR(double angle){
-        drive.turnSync(Math.toRadians(angle));
-    }
 
     private double getSpeed(double xInches, double yInches) {
         double distanceFromPrevPoint;

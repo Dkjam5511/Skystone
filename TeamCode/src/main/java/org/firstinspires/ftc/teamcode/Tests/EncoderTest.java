@@ -1,30 +1,44 @@
 package org.firstinspires.ftc.teamcode.Tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Hardware.Odometers;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
 
 import java.util.List;
 
 @TeleOp(name = "Encoder Test", group = "Tests")
-public class EncoderTest extends OpMode {
-
-    SampleMecanumDriveREVOptimized drive;
+public class EncoderTest extends Robot {
 
     @Override
-    public void init() {
-        drive = new SampleMecanumDriveREVOptimized(hardwareMap);
-    }
+    public void runOpMode() throws InterruptedException {
+        roboInit();
 
-    @Override
-    public void loop() {
-        List<Double> pos = drive.getWheelPositions();
+        waitForStart();
+        double XPos = odometers.getXPos();
+        double rightPos = odometers.rightEncoder.getCurrentPosition();
+        double leftPos = odometers.leftEncoder.getCurrentPosition();
 
-        telemetry.addData("Left: ", pos.get(0));
-        telemetry.addData("Right: ", pos.get(1));
-        telemetry.addData("Center: ", pos.get(2));
+        double beginXPos = XPos;
+        double beginRightPos = rightPos;
+        double beginLeftPos = leftPos;
+
+
+        while (opModeIsActive()) {
+
+            telemetry.addData("X Pos diff", XPos - beginXPos);
+            telemetry.addData("Right diff", rightPos - beginRightPos);
+            telemetry.addData("Left diff", leftPos - beginLeftPos);
+            telemetry.addData("Diff", XPos - beginXPos + rightPos - beginRightPos + leftPos - beginLeftPos);
+            telemetry.update();
+
+            XPos = odometers.getXPos();
+            rightPos = odometers.rightEncoder.getCurrentPosition();
+            leftPos = odometers.leftEncoder.getCurrentPosition();
+        }
     }
 }

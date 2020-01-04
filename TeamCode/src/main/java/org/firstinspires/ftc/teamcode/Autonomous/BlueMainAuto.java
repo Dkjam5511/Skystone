@@ -18,7 +18,7 @@ public class BlueMainAuto extends Robot {
         roboInit();
         pos = vuforiaStuff.vuforiascan(false, false);
         intake.on();
-        liftSystem.hLift.setPower(-.3);
+       // liftSystem.hLift.setPower(-.3);
         switch (pos) {
             case LEFT:
                 driveToPoint(-12, 37, 0, 9);
@@ -41,7 +41,7 @@ public class BlueMainAuto extends Robot {
             driveToPoint(0, -17, 0, STANDARD_SPEED_MODIFIER);
         }
         liftSystem.grabStone();
-        liftSystem.hLift.setPower(0);
+        //liftSystem.hLift.setPower(0);
         intake.off();
         turn_to_heading(90, 0);
         liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
@@ -62,7 +62,7 @@ public class BlueMainAuto extends Robot {
         grabbers.up();
         sleep(200);
         driveToPoint(0, 44, 90, 11);
-        liftSystem.hLift.setPower(-.2);
+        //liftSystem.hLift.setPower(-.2);
         sleep(500);
         driveTrain.applyPower(0, 0, 0, 0);
         liftSystem.stopMotors();

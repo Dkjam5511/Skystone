@@ -35,24 +35,31 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = (2.3622/2); // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 13.5; // in; distance between the left and right wheels
+    public static double LATERAL_DISTANCE = 14; // in; distance between the left and right wheels
     public static double FORWARD_OFFSET = -4.5; // in; offset of the lateral wheel
 
     private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
-    private ExpansionHubEx hub;
+    private ExpansionHubEx hub, hub2;
 
     public ThreeWheelLocalizer(HardwareMap hardwareMap) {
-        super(Arrays.asList(
+        super(
+        Arrays.asList(
                 new Pose2d(0, LATERAL_DISTANCE / 2, 0), // left
                 new Pose2d(0, -LATERAL_DISTANCE / 2, 0), // right
                 new Pose2d(FORWARD_OFFSET, 0, Math.toRadians(90)) // front
         ));
 
-        hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 5");
+        hub = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+        hub2 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
 
-        leftEncoder = hardwareMap.get(ExpansionHubMotor.class, "lf");
-        rightEncoder = hardwareMap.get(ExpansionHubMotor.class, "rf");
-        frontEncoder = hardwareMap.get(ExpansionHubMotor.class,"lr");
+
+        leftEncoder = hardwareMap.get(ExpansionHubMotor.class, "il");
+        rightEncoder = hardwareMap.get(ExpansionHubMotor.class, "ir");
+        frontEncoder = hardwareMap.get(ExpansionHubMotor.class,"rr");
+
+        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -67,9 +74,10 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
     @Override
     public List<Double> getWheelPositions() {
         RevBulkData bulkData = hub.getBulkInputData();
+        RevBulkData bulkData2 = hub2.getBulkInputData();
 
         return Arrays.asList(
-                encoderTicksToInches(-bulkData.getMotorCurrentPosition(leftEncoder)),
+                encoderTicksToInches(bulkData2.getMotorCurrentPosition(leftEncoder)),
                 encoderTicksToInches(-bulkData.getMotorCurrentPosition(rightEncoder)),
                 encoderTicksToInches(-bulkData.getMotorCurrentPosition(frontEncoder))
         );
@@ -77,9 +85,10 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
 
     public List<Double> getWheelVelocities(){
         RevBulkData bulkData = hub.getBulkInputData();
+        RevBulkData bulkData2 = hub2.getBulkInputData();
 
         return Arrays.asList(
-                encoderTicksToInches(-bulkData.getMotorVelocity(leftEncoder)),
+                encoderTicksToInches(bulkData2.getMotorVelocity(leftEncoder)),
                 encoderTicksToInches(-bulkData.getMotorVelocity(rightEncoder)),
                 encoderTicksToInches(-bulkData.getMotorVelocity(frontEncoder))
         );

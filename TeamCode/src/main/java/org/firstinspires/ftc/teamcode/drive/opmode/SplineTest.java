@@ -22,7 +22,7 @@ public class SplineTest extends LinearOpMode {
         if (isStopRequested()) return;
 
         drive.followTrajectorySync(
-                drive.trajectoryBuilder()
+                drive.trajectoryBuilder(new Pose2d(0,0,0), SampleMecanumDriveBase.constraints)
                         .splineTo(new Pose2d(30, 30, 0))
                         .build()
         );
@@ -30,7 +30,7 @@ public class SplineTest extends LinearOpMode {
         sleep(2000);
 
         drive.followTrajectorySync(
-                drive.trajectoryBuilder()
+                drive.trajectoryBuilder(new Pose2d(0,0,0), SampleMecanumDriveBase.constraints)
                         .reverse()
                         .splineTo(new Pose2d(0, 0, 0))
                         .build()
