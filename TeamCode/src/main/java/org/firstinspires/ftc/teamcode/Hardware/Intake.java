@@ -15,8 +15,8 @@ public class Intake {
     }
 
     public void on(){
-        intakeL.setPower(-.75);
-        intakeR.setPower(.75);
+        intakeL.setPower(-1);
+        intakeR.setPower(1);
     }
 
     public void off(){

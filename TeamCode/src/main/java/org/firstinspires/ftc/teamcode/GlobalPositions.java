@@ -14,6 +14,8 @@ public class GlobalPositions {
     public static final double HOOKL_READY = HOOKL_DOWN + .18;  // .24 for flipping stones
     public static final double HOOKR_READY = HOOKR_DOWN - .18;  // .24 for flipping stones
 
+    public static final double MIN_VLIFT_HOLD_POWER = .06;
+
     public static final double MAX_HLIFT_POS = 1;
     public static final double MIN_HLIFT_POS = .07;
 

@@ -19,26 +19,11 @@ public class EncoderTest extends Robot {
         roboInit();
 
         waitForStart();
-        double XPos = odometers.getXPos();
-        double rightPos = odometers.rightEncoder.getCurrentPosition();
-        double leftPos = odometers.leftEncoder.getCurrentPosition();
-
-        double beginXPos = XPos;
-        double beginRightPos = rightPos;
-        double beginLeftPos = leftPos;
-
 
         while (opModeIsActive()) {
-
-            telemetry.addData("X Pos diff", XPos - beginXPos);
-            telemetry.addData("Right diff", rightPos - beginRightPos);
-            telemetry.addData("Left diff", leftPos - beginLeftPos);
-            telemetry.addData("Diff", XPos - beginXPos + rightPos - beginRightPos + leftPos - beginLeftPos);
+            telemetry.addData("X Pos",odometers.getXPos());
+            telemetry.addData("Y Pos", odometers.getYPos());
             telemetry.update();
-
-            XPos = odometers.getXPos();
-            rightPos = odometers.rightEncoder.getCurrentPosition();
-            leftPos = odometers.leftEncoder.getCurrentPosition();
         }
     }
 }

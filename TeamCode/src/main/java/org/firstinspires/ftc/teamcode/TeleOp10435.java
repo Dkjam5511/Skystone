@@ -1,14 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.provider.Settings;
-
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
-import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -30,25 +24,23 @@ public class TeleOp10435 extends OpMode {
     Servo capstonePost;
     int stoneLevel = 0;
     int reverse = 1;
-    final static int stoneTickHeight = 110;
-    final static int firstStoneGap = 50;
+    final static int stoneTickHeight = 135 ;
+    final static int firstStoneGap = 65;
     int liftTargetTicks;
     int prevVLiftTicks;
     int vLiftSpeed;
-    int prevHLiftTicks;
-    int hLiftSpeed;
     int vLiftTicks;
-    int hLiftTicks;
     int vTickCorrection;
-    int hTickCorrection;
     int extraLiftSauce = 0;
-    int capstoneStage = 1;
+    int releasingTicks;
+    int prevVLTicks;
+    double vLTicksPerSec;
+    double vLTime;
+    double prevVLTime;
     double hLiftPos = 0;
     double powerCorrection;
-    double liftStickPower;
     boolean lifting = false;
     boolean vManualLift = false;
-    boolean hManualLift = false;
     boolean intakeOn = false;
     boolean extending = false;
     boolean retracting = false;
@@ -59,7 +51,10 @@ public class TeleOp10435 extends OpMode {
     boolean vLiftFirstRun = true;
     boolean hLiftFirstRun = true;
     boolean deployingCapstone = false;
+    boolean vLTicksPerSecFirstRun = true;
 
+
+    ElapsedTime vLTicksPerSecTimer = new ElapsedTime();
     ElapsedTime aTimer = new ElapsedTime();
     ElapsedTime xTimer = new ElapsedTime();
     ElapsedTime bTimer = new ElapsedTime();
@@ -72,8 +67,6 @@ public class TeleOp10435 extends OpMode {
     ElapsedTime dropTimer = new ElapsedTime();
     ElapsedTime vLiftSpeedTimer = new ElapsedTime();
     ElapsedTime hLiftTimer = new ElapsedTime();
-    ElapsedTime liftSlamTimer = new ElapsedTime();
-    ElapsedTime liftManualTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -92,9 +85,9 @@ public class TeleOp10435 extends OpMode {
         hookR = hardwareMap.servo.get("hkr");
         capstonePost = hardwareMap.servo.get("cp");
 
-
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
+        vLift.setDirection(DcMotor.Direction.REVERSE);
         vLift2.setDirection(DcMotor.Direction.REVERSE);
         intakeL.setDirection(DcMotor.Direction.REVERSE);
 
@@ -105,18 +98,17 @@ public class TeleOp10435 extends OpMode {
 
         vLift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vLift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        vLift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        vLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        vLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        vLift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //vLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //vLift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
         hookL.setPosition(GlobalPositions.HOOKL_UP);
         hookR.setPosition(GlobalPositions.HOOKR_UP);
         capstonePost.setPosition(GlobalPositions.CAPSTONE_START);
-
     }
 
     @Override
@@ -166,7 +158,8 @@ public class TeleOp10435 extends OpMode {
 
         //Control Maps
         if (gamepad1.a && aTimer2.seconds() > .2) {
-            reversing = !reversing;
+            hLift.setPosition(.6);
+            hLiftPos = .6;
             aTimer2.reset();
         }
 
@@ -208,6 +201,7 @@ public class TeleOp10435 extends OpMode {
         if (gamepad2.left_trigger >= .75) {
             stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
             releasing = true;
+            releasingTicks = vLiftTicks;
             dropTimer.reset();
         }
 
@@ -228,14 +222,12 @@ public class TeleOp10435 extends OpMode {
             stoneLevel++;
             lifting = true;
             vManualLift = false;
-            hManualLift = false;
             aTimer.reset();
         }
 
         if (gamepad2.x && xTimer.seconds() > .2) {
             lifting = true;
             vManualLift = false;
-            hManualLift = false;
 
             xTimer.reset();
         }
@@ -245,9 +237,9 @@ public class TeleOp10435 extends OpMode {
             vLiftFirstRun = true;
             hLiftFirstRun = true;
             vManualLift = false;
-            hManualLift = false;
             retracting = true;
             extending = false;
+            vAtIntakePos = false;
             stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
             yTimer.reset();
         }
@@ -258,8 +250,8 @@ public class TeleOp10435 extends OpMode {
             vLiftFirstRun = true;
             hLiftFirstRun = true;
             vManualLift = false;
-            hManualLift = false;
             extending = false;
+            vAtIntakePos = false;
             retracting = true;
             stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
             bTimer.reset();
@@ -268,14 +260,12 @@ public class TeleOp10435 extends OpMode {
         if (gamepad2.right_bumper && upTimer.seconds() > .3) {
             stoneLevel++;
             vManualLift = false;
-            hManualLift = false;
             upTimer.reset();
         }
 
         if (gamepad2.left_bumper && downTimer.seconds() > .3) {
             stoneLevel--;
             vManualLift = false;
-            hManualLift = false;
             downTimer.reset();
         }
 
@@ -321,76 +311,77 @@ public class TeleOp10435 extends OpMode {
         }
 
         //Vertical Lift
-        vLiftTicks = vLift.getCurrentPosition() - vTickCorrection;
+        vLiftTicks = vLift2.getCurrentPosition() - vTickCorrection;
+
+        if (vLTicksPerSecFirstRun) {
+            prevVLTicks = vLiftTicks;
+            prevVLTime = 0;
+            vLTicksPerSecTimer.reset();
+            vLTicksPerSecFirstRun = false;
+        } else {
+            vLTime = vLTicksPerSecTimer.seconds();
+            vLTicksPerSec = (vLiftTicks - prevVLTicks) / (vLTime - prevVLTime);
+            prevVLTicks = vLiftTicks;
+            prevVLTime = vLTime;
+        }
 
         if (stoneLevel > 0) {
             liftTargetTicks = stoneLevel * stoneTickHeight + firstStoneGap + extraLiftSauce;
         } else {
             liftTargetTicks = 0;
         }
+
+        if (Math.abs(gamepad2.left_stick_y) > .03) {
+            vManualLift = true;
+        }
+
         if (lifting) {
-            vAtIntakePos = false;
-
-            if (Math.abs(gamepad2.left_stick_y) > .03) {
-                vManualLift = true;
-            }
-
             if (vManualLift) {
-                if (releasing && vLiftTicks < liftTargetTicks + 30) {
+                if (releasing && vLiftTicks < releasingTicks + 150) {
                     if (dropTimer.seconds() > .25) {
                         extraLiftSauce = 30;
                         vLift.setPower(1);
                         vLift2.setPower(1);
                     }
                 } else {
-                    releasing = false;
-                    if (Math.abs(gamepad2.left_stick_y) > .03){
-                        liftStickPower = gamepad2.left_stick_y;
-
-                        if (liftStickPower > 0){
-                            liftStickPower = liftStickPower + .2;
-                            if (vLiftFirstRun) {
-                                prevVLiftTicks = vLiftTicks;
-                                vLiftSpeedTimer.reset();
-                            } else if (vLiftSpeedTimer.seconds() > .1) {
-                                vLiftSpeed = vLiftTicks - prevVLiftTicks;
-                                prevVLiftTicks = vLiftTicks;
-                                vLiftSpeedTimer.reset();
-                            }
-                            if (Math.abs(vLiftSpeed) > 1){
-                                liftStickPower = liftStickPower*.6;
-                            }
-                        }
-
-                        vLift.setPower(-liftStickPower);
-                        vLift2.setPower(-liftStickPower);
-                    } else {
-                        vLift.setPower(.01);
-                        vLift2.setPower(.01);
+                    if (vLiftTicks > 30){
+                        vAtIntakePos = false; // Activates holding
+                    } else{
+                        vAtIntakePos = true;
                     }
+
+                    releasing = false;
+                    vLift.setPower(getVLiftStickValue());
+                    vLift2.setPower(getVLiftStickValue());
                 }
             } else {
-                powerCorrection = (Math.pow((Math.abs(liftTargetTicks - vLiftTicks) + 5) / 15, 2) + 3) / 100;
+                powerCorrection = (Math.pow((Math.abs(liftTargetTicks - vLiftTicks) + 5) / 20, 2) + 20) / 100; //fix when going down
+
+                if (powerCorrection > 1){
+                    powerCorrection = 1;
+                } else if (powerCorrection < -1){
+                    powerCorrection = -1;
+                }
 
                 if (vLiftTicks < liftTargetTicks - 10) {
                     vLift.setPower(powerCorrection);
                     vLift2.setPower(powerCorrection);
                 } else if (vLiftTicks > liftTargetTicks + 10) {
-                    vLift.setPower(-powerCorrection/2);
-                    vLift2.setPower(-powerCorrection/2);
+                    vLift.setPower(-powerCorrection / 3);
+                    vLift2.setPower(-powerCorrection / 3);
                 } else {
-                    vLift.setPower(.01);
-                    vLift2.setPower(.01);
+                    vLift.setPower(GlobalPositions.MIN_VLIFT_HOLD_POWER);
+                    vLift2.setPower(GlobalPositions.MIN_VLIFT_HOLD_POWER);
                 }
             }
         } else {
-            if (vLiftTicks > 10 && !vAtIntakePos) {
-                if (vLiftTicks > 7 * stoneTickHeight + firstStoneGap){
-                    vLift.setPower(-1);
-                    vLift2.setPower(-1);
-                }else {
-                    vLift.setPower(-.8);
-                    vLift2.setPower(-.8);
+            if (!vAtIntakePos && !vManualLift) {
+                if (vLiftTicks > 4 * stoneTickHeight + firstStoneGap) {
+                    vLift.setPower(-.5);
+                    vLift2.setPower(-.5);
+                } else {
+                    vLift.setPower(-.3);
+                    vLift2.setPower(-.3);
                 }
                 if (vLiftFirstRun) {
                     prevVLiftTicks = vLiftTicks;
@@ -401,21 +392,21 @@ public class TeleOp10435 extends OpMode {
                     vLiftSpeedTimer.reset();
                     if (vLiftSpeed == 0) {
                         vAtIntakePos = true;
+                        vTickCorrection = vLift2.getCurrentPosition();
                     }
                 }
+
                 vLiftFirstRun = false;
-                liftSlamTimer.reset();
 
             } else {
-                vAtIntakePos = true;
                 extraLiftSauce = 0;
-                if (liftSlamTimer.seconds() < .5) {
-                    vLift.setPower(-1);
-                    vLift2.setPower(-1);
-                } else {
-                    vLift.setPower(0);
-                    vLift2.setPower(0);
-                    vTickCorrection = vLift.getCurrentPosition();
+                vLift.setPower(getVLiftStickValue());
+                vLift2.setPower(getVLiftStickValue());
+
+                if (vLiftTicks > 30){
+                    vAtIntakePos = false; // Activates holding
+                } else{
+                    vAtIntakePos = true;
                 }
             }
 
@@ -431,12 +422,12 @@ public class TeleOp10435 extends OpMode {
                     hLift.setPosition(.8);
                     hLiftPos = .8;
                 }
-            } else if (hLiftTimer.seconds() < 1.25 && deployingCapstone){
+            } else if (hLiftTimer.seconds() < 1.25 && deployingCapstone) {
                 stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_CAPSTONE);
-                hLift.setPosition(.6);
-                hLiftPos = .6;
-                capstonePost.setPosition(1);
-            } else{
+                hLift.setPosition(.65);
+                hLiftPos = .65;
+                capstonePost.setPosition(.77);
+            } else {
                 extending = false;
             }
         } else if (retracting) {
@@ -447,7 +438,7 @@ public class TeleOp10435 extends OpMode {
         } else {
             hLiftPos += -gamepad2.right_stick_y / 100;
 
-            if (hLiftPos > GlobalPositions.MAX_HLIFT_POS){
+            if (hLiftPos > GlobalPositions.MAX_HLIFT_POS) {
                 hLiftPos = GlobalPositions.MAX_HLIFT_POS;
             }
             if (hLiftPos < GlobalPositions.MIN_HLIFT_POS) {
@@ -456,88 +447,55 @@ public class TeleOp10435 extends OpMode {
             hLift.setPosition(hLiftPos);
         }
 
-
-        /*
-        Old horizontal Lift
-        hLiftTicks = hLiftEncoder.getCurrentPosition() - hTickCorrection;
-
-        if (extending) {
-            hAtIntakePos = false;
-
-            if (hLiftTicks < 7000 && !deployingCapstone) {
-                hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
-                if (hLiftTicks > 6500) {
-                    stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
-                }
-            } else if (deployingCapstone) {
-                if (capstoneStage == 1){
-                    if (hLiftTicks < 8000){ // Extend Out hLift
-                        hLift.setPower(GlobalPositions.HLIFT_FORWARD_SPEED);
-                    } else {
-                        capstoneStage = 2;
-                    }
-                    if (hLiftTicks > 7500) {
-                        stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_CAPSTONE); // Once hlift is extended a certain ammount move servos into place
-                        capstonePost.setPosition(1);
-                        capstoneTimer.reset();
-                    }
-                } else if (capstoneStage == 2){
-                    if (hLiftTicks > 7000) { // Move hLift to capstone position
-                        if(capstoneTimer.seconds() > .5) {
-                            hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED);
-                        } else {
-                            hLift.setPower(0);
-                        }
-                    } else {
-                        capstoneStage = 3;
-                    }
-                } else if (capstoneStage == 3){ //Exit "deployingCapstone"
-                    hLift.setPower(0);
-                    extending = false;
-                }
-            } else {
-                extending = false;
-            }
-        } else if (retracting && !hAtIntakePos) {
-            hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED);
-            stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
-            if (hLiftFirstRun) {
-                prevHLiftTicks = hLiftTicks;
-                hLiftSpeedTimer.reset();
-            } else if (hLiftSpeedTimer.seconds() > .1) {
-                hLiftSpeed = hLiftTicks - prevHLiftTicks;
-                prevHLiftTicks = hLiftTicks;
-                hLiftSpeedTimer.reset();
-                if (hLiftSpeed > -20) {
-                    hAtIntakePos = true;
-                    hTickCorrection = hLiftEncoder.getCurrentPosition();
-                }
-            }
-            hLiftFirstRun = false;
-        } else{
-            if (Math.abs(gamepad2.right_stick_y) > .1) {
-                hManualLift = true;
-            }
-
-            if (hLiftTicks > 200 && hAtIntakePos && !hManualLift) {
-                hLift.setPower(GlobalPositions.HLIFT_REVERSE_SPEED / 2);
-            } else {
-                hLift.setPower(-gamepad2.right_stick_y);
-            }
-            extending = false;
-            retracting = false;
-            deployingCapstone = false;
-            capstoneStage = 1;
-        }
-*/
         telemetry.addData("Stone Level: ", stoneLevel);
         telemetry.addData("VLift Encoder: ", vLiftTicks);
-        telemetry.addData("VLift Target: ", liftTargetTicks);
+        telemetry.addData("Estimated Stone Level: ", estStoneLevel());
         telemetry.addData("VLift Tick Correction", vTickCorrection);
-        telemetry.addData("VLift Stick Power", liftStickPower);
+        telemetry.addData("VLift Stick Power", getVLiftStickValue());
         telemetry.addData("Power Correction", powerCorrection);
         telemetry.addData("Manual Lift Mode", vManualLift);
         telemetry.addData("VLift Speed", vLiftSpeed);
+        telemetry.addData("vLTicksPerSec", vLTicksPerSec);
         telemetry.update();
+    }
+
+    private double getVLiftStickValue() {
+        double extraJuice = 0;
+        double liftStickPower;
+        liftStickPower = gamepad2.left_stick_y;
+
+
+        if (estStoneLevel() >= 9 ){
+            extraJuice = .04;
+        }
+
+        if (Math.abs(gamepad2.left_stick_y) > GlobalPositions.MIN_VLIFT_HOLD_POWER) { // if there is any input on the stick...
+
+            if (gamepad2.left_stick_y > 0) { // if we are going down
+
+                if (gamepad2.left_stick_y < .8){
+                    if (vLTicksPerSec < -50) {
+                        liftStickPower = -.01;
+                    } else {
+                        liftStickPower = ((((GlobalPositions.MIN_VLIFT_HOLD_POWER + extraJuice) / GlobalPositions.MIN_VLIFT_HOLD_POWER) * liftStickPower) - ((GlobalPositions.MIN_VLIFT_HOLD_POWER + extraJuice) * 10)) / 10;
+                    }
+                } else {
+                    liftStickPower /= 3;
+                }
+            }
+        } else {
+            if (!vAtIntakePos) { // if we are not at the intake position apply holding power
+                liftStickPower = -GlobalPositions.MIN_VLIFT_HOLD_POWER - extraJuice;
+            }
+        }
+
+        return -liftStickPower;
+    }
+
+    private int estStoneLevel(){ //Estimates what stone level we are currently at
+
+        double stoneLevel = (vLiftTicks-firstStoneGap)/stoneTickHeight;
+
+        return (int)stoneLevel;
     }
 }

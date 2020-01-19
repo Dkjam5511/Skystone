@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Hardware.LiftSystem;
 import org.firstinspires.ftc.teamcode.Robot;
 
 
 @Autonomous(name = "Blue Auto", group = "Autonomous")
+@Disabled
 public class BlueMainAuto extends Robot {
 
     VuforiaStuff.skystonePos pos;

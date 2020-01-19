@@ -205,6 +205,308 @@ abstract public class Robot extends LinearOpMode {
         driveTrain.applyPower(0, 0, 0, 0);
     }
 
+    public void driveToPoint3(double xInches, double yInches, double heading, double maxWheelPower, double xCorrectFactor) {
+
+        DbgLog.msg(
+                "10435-starting driveToPoint"
+                        + " X:" + xInches
+                        + " Y:" + yInches
+                        + " Heading:" + heading
+                        + " maxWheelPower:" + maxWheelPower
+        );
+
+        double wheel_encoder_ticks = 2400;
+        double wheel_diameter = 2.3622;
+        double ticks_per_inch = wheel_encoder_ticks / (wheel_diameter * Math.PI);
+
+        double currentXInches;
+        double currentYInches;
+        double startXPos = odometers.getXPos();
+        double startYPos = odometers.getYPos();
+
+        double lfPower;
+        double rfPower;
+        double lrPower;
+        double rrPower;
+
+        double currentSpeed;
+        double highestCurrentSpeed = 0;
+        double distanceToStop;
+
+        double speedIncrease = .15;
+        double wheelPower = .15; //Minimum speed we start at
+
+        boolean stop = false;
+
+        currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
+        currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
+        double distanceToX = xInches - currentXInches;
+        double distanceToY = yInches - currentYInches;
+
+        gsFirstRun = true;
+        currentSpeed = getSpeed(currentXInches, currentYInches);
+
+        double distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the triangle is the remaining distance
+
+        /*
+        if (xCorrectFactor == 0) {
+            xCorrectFactor = 1;
+        }
+        */
+
+        DbgLog.msg(
+                "10435 driveToPoint"
+                        + " XPos:" + Double.toString(currentXInches)
+                        + " YPos:" + Double.toString(currentYInches)
+                        + " Wheel Power:" + Double.toString(wheelPower)
+                        + " Distance remaining:" + Double.toString(distanceRemaining)
+        );
+
+        ElapsedTime timeoutTimer = new ElapsedTime();
+
+        while ((distanceRemaining > 1 || currentSpeed > 7 /*|| degreesToTurn > .5*/) && opModeIsActive() && timeoutTimer.seconds() < 1 ) {
+
+            liftSystem.runLift();
+
+            wheelPower += speedIncrease;
+            if (Math.abs(wheelPower) > Math.abs(maxWheelPower)) {
+                wheelPower = maxWheelPower;
+            }
+
+            if (stop){
+                if (currentSpeed > 30){
+                    wheelPower = .08;
+                } else {
+                    wheelPower = .04;
+                }
+            }
+
+            double angleRadians;
+            angleRadians = Math.atan2(distanceToY, distanceToX * xCorrectFactor) - Math.PI / 4;
+
+            double adjustment = imu.headingAdjustment(heading);
+
+            if (adjustment > maxWheelPower) {
+                adjustment = maxWheelPower;
+            } else if (adjustment < -maxWheelPower) {
+                adjustment = -maxWheelPower;
+            }
+
+            lfPower = wheelPower * Math.cos(angleRadians) - adjustment;
+            rfPower = wheelPower * Math.sin(angleRadians) + adjustment;
+            lrPower = wheelPower * Math.sin(angleRadians) - adjustment;
+            rrPower = wheelPower * Math.cos(angleRadians) + adjustment;
+
+
+
+            driveTrain.applyPower(lfPower, rfPower, lrPower, rrPower);
+
+            currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
+            currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
+            if (xCorrectFactor == 0){
+                distanceToX = 0;
+            }else {
+                distanceToX = xInches - currentXInches;
+            }
+            distanceToY = yInches - currentYInches;
+
+            currentSpeed = getSpeed(currentXInches, currentYInches);
+
+            if (currentSpeed > highestCurrentSpeed) {
+                highestCurrentSpeed = currentSpeed;
+            }
+
+            if (Math.abs(currentSpeed) > .5) {
+                timeoutTimer.reset();
+            }
+            distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the x and y is the remaining distance
+
+            //distanceToStop = (-4.11) + .346 * currentSpeed + .00969 * Math.pow(currentSpeed, 2);
+            distanceToStop = 0.994 + 0.0111 * currentSpeed - (0.00217*Math.pow(currentSpeed,2)) + 0.00093*Math.pow(currentSpeed,3) - (1.23e-05*Math.pow(currentSpeed,4));
+
+            if (distanceRemaining <= distanceToStop && distanceRemaining > 1) {
+                stop = true;
+                speedIncrease = .01;
+            } else {
+                stop = false;
+            }
+
+            DbgLog.msg(
+                    "10435 driveToPoint"
+                            + " XPos:" + currentXInches
+                            + " YPos:" + currentYInches
+                            + " distanceToX:" + distanceToX
+                            + " distanceToY:" + distanceToY
+                            + " Wheel Power:" + wheelPower
+                            + " Distance remaining:" + distanceRemaining
+                            + " angleradianDegrees:" + Math.toDegrees(angleRadians + Math.PI / 4)
+                            + " currentSpeed:" + currentSpeed
+                            + " adjustment:" + adjustment
+                            + " current heading:" + imu.readCurrentHeading()
+                            + " distance to stop:" + distanceToStop
+                            + " stop" + stop
+            );
+        }
+        driveTrain.applyPower(0, 0, 0, 0);
+        telemetry.addData("distance remaining: ", distanceToY);
+        telemetry.addData("Power distance: ", yInches);
+        telemetry.addData("Highest Speed: ", highestCurrentSpeed);
+        telemetry.update();
+    }
+    public void driveToPoint3SpinStone(double xInches, double yInches, double heading, double maxWheelPower, double xCorrectFactor, double spinnerUpDistance) {
+
+        DbgLog.msg(
+                "10435-starting driveToPoint"
+                        + " X:" + xInches
+                        + " Y:" + yInches
+                        + " Heading:" + heading
+                        + " maxWheelPower:" + maxWheelPower
+        );
+
+        double wheel_encoder_ticks = 2400;
+        double wheel_diameter = 2.3622;  // size of wheels
+        double ticks_per_inch = wheel_encoder_ticks / (wheel_diameter * Math.PI);
+
+        double currentXInches;
+        double currentYInches;
+        double startXPos = odometers.getXPos();
+        double startYPos = odometers.getYPos();
+
+        double lfPower;
+        double rfPower;
+        double lrPower;
+        double rrPower;
+
+        double currentSpeed;
+        double highestCurrentSpeed = 0;
+        double distanceToStop;
+
+        double speedIncrease = .15;
+        double wheelPower = .15; //Minimum speed we start at
+
+        boolean stop = false;
+
+        currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
+        currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
+        double distanceToX = xInches - currentXInches;
+        double distanceToY = yInches - currentYInches;
+
+        gsFirstRun = true;
+        currentSpeed = getSpeed(currentXInches, currentYInches);
+
+        double distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the triangle is the remaining distance
+
+        /*
+        if (xCorrectFactor == 0) {
+            xCorrectFactor = 1;
+        }
+        */
+
+        DbgLog.msg(
+                "10435 driveToPoint"
+                        + " XPos:" + Double.toString(currentXInches)
+                        + " YPos:" + Double.toString(currentYInches)
+                        + " Wheel Power:" + Double.toString(wheelPower)
+                        + " Distance remaining:" + Double.toString(distanceRemaining)
+        );
+
+        ElapsedTime timeoutTimer = new ElapsedTime();
+
+        while ((distanceRemaining > 1 || currentSpeed > 7 /*|| degreesToTurn > .5*/) && opModeIsActive() && timeoutTimer.seconds() < 1 ) {
+
+            liftSystem.runLift();
+
+            wheelPower += speedIncrease;
+            if (Math.abs(wheelPower) > Math.abs(maxWheelPower)) {
+                wheelPower = maxWheelPower;
+            }
+
+            if (stop){
+                if (currentSpeed > 30){
+                    wheelPower = .08;
+                } else {
+                    wheelPower = .04;
+                }
+            }
+
+            double angleRadians;
+            angleRadians = Math.atan2(distanceToY, distanceToX * xCorrectFactor) - Math.PI / 4;
+
+            double adjustment = imu.headingAdjustment(heading);
+
+            if (adjustment > maxWheelPower) {
+                adjustment = maxWheelPower;
+            } else if (adjustment < -maxWheelPower) {
+                adjustment = -maxWheelPower;
+            }
+
+            lfPower = wheelPower * Math.cos(angleRadians) - adjustment;
+            rfPower = wheelPower * Math.sin(angleRadians) + adjustment;
+            lrPower = wheelPower * Math.sin(angleRadians) - adjustment;
+            rrPower = wheelPower * Math.cos(angleRadians) + adjustment;
+
+
+
+            driveTrain.applyPower(lfPower, rfPower, lrPower, rrPower);
+
+            currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
+            currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
+            if (xCorrectFactor == 0){
+                distanceToX = 0;
+            }else {
+                distanceToX = xInches - currentXInches;
+            }
+            distanceToY = yInches - currentYInches;
+
+            currentSpeed = getSpeed(currentXInches, currentYInches);
+
+            if (currentSpeed > highestCurrentSpeed) {
+                highestCurrentSpeed = currentSpeed;
+            }
+
+            if (Math.abs(currentSpeed) > .5) {
+                timeoutTimer.reset();
+            }
+            distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the x and y is the remaining distance
+
+            //distanceToStop = (-4.11) + .346 * currentSpeed + .00969 * Math.pow(currentSpeed, 2);
+            distanceToStop = 0.994 + 0.0111 * currentSpeed - (0.00217*Math.pow(currentSpeed,2)) + 0.00093*Math.pow(currentSpeed,3) - (1.23e-05*Math.pow(currentSpeed,4));
+
+            if (distanceRemaining <= distanceToStop && distanceRemaining > 1) {
+                stop = true;
+                speedIncrease = .01;
+            } else {
+                stop = false;
+            }
+
+            if (distanceRemaining < spinnerUpDistance && spinnerUpDistance > 0) {
+                liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
+                spinnerUpDistance = 0;
+            }
+
+            DbgLog.msg(
+                    "10435 driveToPoint3Extend"
+                            + " XPos:" + currentXInches
+                            + " YPos:" + currentYInches
+                            + " distanceToX:" + distanceToX
+                            + " distanceToY:" + distanceToY
+                            + " Wheel Power:" + wheelPower
+                            + " Distance remaining:" + distanceRemaining
+                            + " angleradianDegrees:" + Math.toDegrees(angleRadians + Math.PI / 4)
+                            + " currentSpeed:" + currentSpeed
+                            + " adjustment:" + adjustment
+                            + " current heading:" + imu.readCurrentHeading()
+                            + " distance to stop:" + distanceToStop
+                            + " stop" + stop
+            );
+        }
+        driveTrain.applyPower(0, 0, 0, 0);
+        telemetry.addData("distance remaining: ", distanceToY);
+        telemetry.addData("Power distance: ", yInches);
+        telemetry.addData("Highest Speed: ", highestCurrentSpeed);
+        telemetry.update();
+    }
+
     public void driveToPoint2(double xInches, double yInches, double heading, double speedModifier, double xCorrectFactor) {
 
         DbgLog.msg(
@@ -318,188 +620,7 @@ abstract public class Robot extends LinearOpMode {
         driveTrain.applyPower(0, 0, 0, 0);
     }
 
-    public void driveToPoint3(double xInches, double yInches, double heading, double maxWheelPower, double xCorrectFactor) {
 
-        DbgLog.msg(
-                "10435-starting driveToPoint"
-                        + " X:" + xInches
-                        + " Y:" + yInches
-                        + " Heading:" + heading
-                        + " maxWheelPower:" + maxWheelPower
-        );
-
-        double wheel_encoder_ticks = 2400;
-        double wheel_diameter = 2.3622;  // size of wheels
-        double ticks_per_inch = wheel_encoder_ticks / (wheel_diameter * Math.PI);
-
-        double currentXInches;
-        double currentYInches;
-        double startXPos = odometers.getXPos();
-        double startYPos = odometers.getYPos();
-
-        double lfPower;
-        double rfPower;
-        double lrPower;
-        double rrPower;
-
-        double currentSpeed;
-        double highestCurrentSpeed = 0;
-        double distanceToStop;
-
-        double speedIncrease = .15;
-        double wheelPower = .15; //Minimum speed we start at
-
-        boolean stop = false;
-
-        currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
-        currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
-        double distanceToX = xInches - currentXInches;
-        double distanceToY = yInches - currentYInches;
-
-        gsFirstRun = true;
-        currentSpeed = getSpeed(currentXInches, currentYInches);
-
-        double distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the triangle is the remaining distance
-
-        /*
-        if (xCorrectFactor == 0) {
-            xCorrectFactor = 1;
-        }
-        */
-
-        DbgLog.msg(
-                "10435 driveToPoint"
-                        + " XPos:" + Double.toString(currentXInches)
-                        + " YPos:" + Double.toString(currentYInches)
-                        + " Wheel Power:" + Double.toString(wheelPower)
-                        + " Distance remaining:" + Double.toString(distanceRemaining)
-        );
-
-        ElapsedTime timeoutTimer = new ElapsedTime();
-
-        while ((distanceRemaining > 1 || currentSpeed > 7 /*|| degreesToTurn > .5*/) && opModeIsActive() && timeoutTimer.seconds() < 1 ) {
-
-            liftSystem.runLift();
-
-            wheelPower += speedIncrease;
-            if (Math.abs(wheelPower) > Math.abs(maxWheelPower)) {
-                wheelPower = maxWheelPower;
-            }
-
-            if (stop){
-                if (currentSpeed > 30){
-                    wheelPower = .08;
-                } else {
-                    wheelPower = .04;
-                }
-            }
-
-            double angleRadians;
-            angleRadians = Math.atan2(distanceToY, distanceToX * xCorrectFactor) - Math.PI / 4;
-
-            double adjustment = imu.headingAdjustment(heading);
-
-            if (adjustment > maxWheelPower) {
-                adjustment = maxWheelPower;
-            } else if (adjustment < -maxWheelPower) {
-                adjustment = -maxWheelPower;
-            }
-
-            /*
-            if (wheelPower < .1 && currentSpeed > 20){
-                adjustment = adjustment * 2;
-                if (adjustment < 0) {
-                    lfPower = wheelPower * Math.cos(angleRadians) - adjustment;
-                    lrPower = wheelPower * Math.sin(angleRadians) - adjustment;
-                    rfPower = wheelPower * Math.sin(angleRadians);
-                    rrPower = wheelPower * Math.cos(angleRadians);
-                } else {
-                    rfPower = wheelPower * Math.sin(angleRadians) + adjustment;
-                    rrPower = wheelPower * Math.cos(angleRadians) + adjustment;
-                    lfPower = wheelPower * Math.cos(angleRadians);
-                    lrPower = wheelPower * Math.sin(angleRadians);
-                }
-            } else{
-                lfPower = wheelPower * Math.cos(angleRadians) - adjustment;
-                rfPower = wheelPower * Math.sin(angleRadians) + adjustment;
-                lrPower = wheelPower * Math.sin(angleRadians) - adjustment;
-                rrPower = wheelPower * Math.cos(angleRadians) + adjustment;
-            }
-            */
-
-            lfPower = wheelPower * Math.cos(angleRadians) - adjustment;
-            rfPower = wheelPower * Math.sin(angleRadians) + adjustment;
-            lrPower = wheelPower * Math.sin(angleRadians) - adjustment;
-            rrPower = wheelPower * Math.cos(angleRadians) + adjustment;
-
-
-
-            driveTrain.applyPower(lfPower, rfPower, lrPower, rrPower);
-
-            /*
-            telemetry.addData("XPos: ", currentXInches);
-            telemetry.addData("YPos: ", currentYInches);
-            telemetry.addData("Current Speed:", currentSpeed);
-            telemetry.addData("Wheel Power: ", wheelPower);
-            telemetry.addData("distanceToX: ", distanceToX);
-            telemetry.addData("distanceToY: ", distanceToY);
-            telemetry.addData("Distance remaining: ", distanceRemaining);
-            telemetry.addData("andleradians: ", angleRadians);
-            telemetry.addData("angleradianDegrees: ", Math.toDegrees(angleRadians));
-            telemetry.update();
-            */
-            currentXInches = (odometers.getXPos() - startXPos) / ticks_per_inch;
-            currentYInches = (odometers.getYPos() - startYPos) / ticks_per_inch;
-            if (xCorrectFactor == 0){
-                distanceToX = 0;
-            }else {
-                distanceToX = xInches - currentXInches;
-            }
-            distanceToY = yInches - currentYInches;
-
-            currentSpeed = getSpeed(currentXInches, currentYInches);
-
-            if (currentSpeed > highestCurrentSpeed) {
-                highestCurrentSpeed = currentSpeed;
-            }
-
-            if (Math.abs(currentSpeed) > .5) {
-                timeoutTimer.reset();
-            }
-            distanceRemaining = Math.sqrt(Math.pow(distanceToX, 2) + Math.pow(distanceToY, 2));  // hypotenuse of the x and y is the remaining distance
-
-            //distanceToStop = (-4.11) + .346 * currentSpeed + .00969 * Math.pow(currentSpeed, 2);
-            distanceToStop = 0.994 + 0.0111 * currentSpeed - (0.00217*Math.pow(currentSpeed,2)) + 0.00093*Math.pow(currentSpeed,3) - (1.23e-05*Math.pow(currentSpeed,4));
-
-            if (distanceRemaining <= distanceToStop && distanceRemaining > 1) {
-                stop = true;
-                speedIncrease = .01;
-            } else {
-                stop = false;
-            }
-
-            DbgLog.msg(
-                    "10435 driveToPoint"
-                            + " XPos:" + currentXInches
-                            + " YPos:" + currentYInches
-                            + " distanceToX:" + distanceToX
-                            + " distanceToY:" + distanceToY
-                            + " Wheel Power:" + wheelPower
-                            + " Distance remaining:" + distanceRemaining
-                            + " angleradianDegrees:" + Math.toDegrees(angleRadians + Math.PI / 4)
-                            + " currentSpeed:" + currentSpeed
-                            + " adjustment:" + adjustment
-                            + " current heading:" + imu.readCurrentHeading()
-                            + " distance to stop:" + distanceToStop
-                            + " stop" + stop
-            );
-        }
-        driveTrain.applyPower(0, 0, 0, 0);
-        telemetry.addData("distance remaining: ", distanceToY);
-        telemetry.addData("Power distance: ", yInches);
-        telemetry.addData("Highest Speed: ", highestCurrentSpeed);
-        telemetry.update();
-    }
 
     public void turn_to_heading(double target_heading, double speedModifier) {
         boolean goRight;

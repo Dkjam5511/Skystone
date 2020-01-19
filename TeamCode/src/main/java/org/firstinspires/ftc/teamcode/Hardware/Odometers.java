@@ -22,7 +22,7 @@ public class Odometers {
     }
 
     public double getXPos() {
-        return frontEncoder.getCurrentPosition();
+        return -frontEncoder.getCurrentPosition();
     }
 
     public double getYPos() {

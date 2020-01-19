@@ -13,7 +13,7 @@ public class BlueAuto2Stone extends Robot {
     double stoneDiff;
     double stoneDiff2;
 
-    double driftAdjustment = -2;
+    double driftAdjustment = -3;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -35,8 +35,8 @@ public class BlueAuto2Stone extends Robot {
             case RIGHT:
                 //driveToPoint3(10, 9, 0, 1,1);
                 //driveToPoint3(0, 33, 0, 1,1);
-                driveToPoint3(7, 30, 0, .7, 6);
-                stoneDiff = 13;
+                driveToPoint3(8, 30, 0, .7, 6);
+                stoneDiff = 14;
                 stoneDiff2 = 7.5;
                 break;
         }
@@ -46,7 +46,7 @@ public class BlueAuto2Stone extends Robot {
         intake.off();
         turn_to_heading(90, -25);  // was 50;  put x inches in next statement to account for x encoder turning
         liftSystem.hLift.setPosition(1);
-        driveToPoint3(0, -(72 + stoneDiff), 90 + driftAdjustment, 1, 0);
+        driveToPoint3(0, -(70 + stoneDiff), 90 + driftAdjustment, 1, 0);
         liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
         turn_to_heading(180, -25); // was 50
         grabbers.ready();
@@ -66,16 +66,16 @@ public class BlueAuto2Stone extends Robot {
             driveToPoint3(0, 94 + stoneDiff2, 90, 1, 0);
             intake.on();
             //liftSystem.hLift.setPower(-.3);
-            turn_to_heading(45, -40);
+            turn_to_heading(45, -20);
             driveToPoint3(-13, 13, 45, .4, 1);
             driveToPoint3(0, -25, 45, .8, 0);
             liftSystem.grabStone();
-            turn_to_heading(90 + driftAdjustment, -40);
+            turn_to_heading(90 + driftAdjustment, -20);
             liftSystem.hLift.setPosition(.75);
             liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
-            driveToPoint3(0, -(75 + stoneDiff2), 90 + driftAdjustment, 1, 0);
-            liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
-            sleep(500);
+            driveToPoint3SpinStone(0, -(75 + stoneDiff2), 90 + driftAdjustment, 1, 0, 30);
+            //liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
+            //sleep(500);
             liftSystem.dropStone();
             liftSystem.hLift.setPosition(GlobalPositions.MIN_HLIFT_POS);
             liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
@@ -91,9 +91,9 @@ public class BlueAuto2Stone extends Robot {
             turn_to_heading(90, -25);
             liftSystem.hLift.setPosition(.75);
             liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
-            driveToPoint3(0, -(92 + stoneDiff2), 90, 1, 0);
-            liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
-            sleep(500);
+            driveToPoint3SpinStone(0, -(92 + stoneDiff2), 90, 1, 0, 30);
+            //liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_UP);
+            //sleep(500);
             liftSystem.dropStone();
             liftSystem.hLift.setPosition(GlobalPositions.MIN_HLIFT_POS);
             liftSystem.stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
