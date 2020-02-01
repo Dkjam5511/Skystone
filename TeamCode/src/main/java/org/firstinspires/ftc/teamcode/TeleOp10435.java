@@ -24,7 +24,7 @@ public class TeleOp10435 extends OpMode {
     Servo capstonePost;
     int stoneLevel = 0;
     int reverse = 1;
-    final static int stoneTickHeight = 135 ;
+    final static int stoneTickHeight = 140;
     final static int firstStoneGap = 65;
     int liftTargetTicks;
     int prevVLiftTicks;
@@ -89,7 +89,7 @@ public class TeleOp10435 extends OpMode {
         rr.setDirection(DcMotor.Direction.REVERSE);
         vLift.setDirection(DcMotor.Direction.REVERSE);
         vLift2.setDirection(DcMotor.Direction.REVERSE);
-        intakeL.setDirection(DcMotor.Direction.REVERSE);
+        intakeR.setDirection(DcMotor.Direction.REVERSE);
 
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -100,9 +100,6 @@ public class TeleOp10435 extends OpMode {
         vLift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         vLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        //vLift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //vLift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
@@ -158,8 +155,8 @@ public class TeleOp10435 extends OpMode {
 
         //Control Maps
         if (gamepad1.a && aTimer2.seconds() > .2) {
-            hLift.setPosition(.6);
-            hLiftPos = .6;
+            hLift.setPosition(.53);
+            hLiftPos = .53;
             aTimer2.reset();
         }
 
@@ -178,16 +175,16 @@ public class TeleOp10435 extends OpMode {
 
         if (intakeOn) {
             if ((gamepad1.right_trigger == 1)) {
-                intakeL.setPower(-1);
-                intakeR.setPower(-1);
+                intakeL.setPower(-.75);
+                intakeR.setPower(-.75);
             } else {
-                intakeL.setPower(.75);
-                intakeR.setPower(.75);
+                intakeL.setPower(1);
+                intakeR.setPower(1);
             }
         } else {
             if (gamepad1.right_trigger == 1) {
-                intakeL.setPower(-1);
-                intakeR.setPower(-1);
+                intakeL.setPower(-.75);
+                intakeR.setPower(-.75);
             } else {
                 intakeL.setPower(0);
                 intakeR.setPower(0);
@@ -311,7 +308,7 @@ public class TeleOp10435 extends OpMode {
         }
 
         //Vertical Lift
-        vLiftTicks = vLift2.getCurrentPosition() - vTickCorrection;
+        vLiftTicks = vLift.getCurrentPosition() - vTickCorrection;
 
         if (vLTicksPerSecFirstRun) {
             prevVLTicks = vLiftTicks;
@@ -380,8 +377,8 @@ public class TeleOp10435 extends OpMode {
                     vLift.setPower(-.5);
                     vLift2.setPower(-.5);
                 } else {
-                    vLift.setPower(-.3);
-                    vLift2.setPower(-.3);
+                    vLift.setPower(-.35);
+                    vLift2.setPower(-.35);
                 }
                 if (vLiftFirstRun) {
                     prevVLiftTicks = vLiftTicks;
@@ -392,7 +389,7 @@ public class TeleOp10435 extends OpMode {
                     vLiftSpeedTimer.reset();
                     if (vLiftSpeed == 0) {
                         vAtIntakePos = true;
-                        vTickCorrection = vLift2.getCurrentPosition();
+                        vTickCorrection = vLift.getCurrentPosition();
                     }
                 }
 
@@ -403,7 +400,7 @@ public class TeleOp10435 extends OpMode {
                 vLift.setPower(getVLiftStickValue());
                 vLift2.setPower(getVLiftStickValue());
 
-                if (vLiftTicks > 30){
+                if (vLiftTicks > 60){
                     vAtIntakePos = false; // Activates holding
                 } else{
                     vAtIntakePos = true;

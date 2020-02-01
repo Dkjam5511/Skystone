@@ -11,8 +11,9 @@ public class AutoTest extends Robot {
 
     public void runOpMode() throws InterruptedException {
         roboInit();
-
-        intake.on();
+        //checkCoast(0,48,0, 1, .15);
+        driveToPoint(0, 95, 0, 9);
+        //intake.on();
         // RED pick up left stone from left - this works
         //driveToPoint3(-40, 22, 45, .7, 3);
 
@@ -20,7 +21,7 @@ public class AutoTest extends Robot {
         //driveToPoint3(10, 40, 345, .7, 3);
 
         // RED pick up right stone from the right
-        driveToPoint3(18, 35, 345, .7, 8);
+       // driveToPoint3(18, 35, 345, .7, 8);
 
 /**** Code to test odometers
         double XPos = odometers.getXPos();
@@ -128,10 +129,6 @@ public class AutoTest extends Robot {
         driveToPoint(0, -15,315,9);
         driveToPoint(0,-70,0,9);
  */
-
-        driveTrain.applyPower(0, 0, 0, 0);
-        liftSystem.stopMotors();
-        intake.off();
 
         }
 

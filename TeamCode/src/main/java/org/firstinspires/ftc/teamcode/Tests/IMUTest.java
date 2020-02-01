@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Hardware.IMU;
-import org.firstinspires.ftc.teamcode.Robot;
+
 @TeleOp (name = "IMUTest", group = "Tests")
 public class IMUTest extends OpMode {
 
@@ -21,7 +21,7 @@ public class IMUTest extends OpMode {
 
     @Override
     public void loop() {
-        double heading = imu.readCurrentHeading();
+        double heading = imu.getCurrentHeading();
         telemetry.addData("Heading", heading);
         telemetry.update();
     }

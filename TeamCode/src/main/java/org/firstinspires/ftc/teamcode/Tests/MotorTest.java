@@ -9,17 +9,25 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp (name = "Motor Test", group = "Tests")
 public class MotorTest extends OpMode {
 
-    DcMotor motor1;
-    DcMotor motor2;
+    DcMotor lf;
+    DcMotor lr;
+    DcMotor rf;
+    DcMotor rr;
 
-    double motor1pos;
-    double motor2pos;
+    double lfPos = 0;
+    double lrPos = 0;
+    double rfPos = 0;
+    double rrPos = 0;
 
-    double prevmotor1pos = 0;
-    double prevmotor2pos = 0;
+    double prevlfpos = 0;
+    double prevlrpos = 0;
+    double prevrfpos = 0;
+    double prevrrpos = 0;
 
-    double tickspersecond1;
-    double tickspersecond2;
+    double ticksPerSecondlf;
+    double ticksPerSecondlr;
+    double ticksPerSecondrf;
+    double ticksPerSecondrr;
 
     double difference;
 
@@ -27,42 +35,59 @@ public class MotorTest extends OpMode {
 
     @Override
     public void init() {
-        motor1 = hardwareMap.dcMotor.get("vl");
-        motor2 = hardwareMap.dcMotor.get("vl2");
+        lf = hardwareMap.dcMotor.get("lf");
+        lr = hardwareMap.dcMotor.get("lr");
+        rf = hardwareMap.dcMotor.get("rf");
+        rr = hardwareMap.dcMotor.get("rr");
 
-        motor2.setDirection(DcMotor.Direction.REVERSE);
+        rf.setDirection(DcMotor.Direction.REVERSE);
+        rr.setDirection(DcMotor.Direction.REVERSE);
 
-        motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        motor1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motor2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         timer.reset();
     }
 
     @Override
     public void loop() {
-        motor1.setPower(gamepad1.left_stick_y);
-        motor2.setPower(gamepad1.left_stick_y);
+        lf.setPower(gamepad1.left_stick_y);
+        lr.setPower(gamepad1.left_stick_y);
+        rf.setPower(gamepad1.left_stick_y);
+        rr.setPower(gamepad1.left_stick_y);
 
         if (timer.seconds() > 1){
-            motor1pos = motor1.getCurrentPosition();
-            motor2pos = motor2.getCurrentPosition();
+            lfPos = lf.getCurrentPosition();
+            lrPos = lr.getCurrentPosition();
+            rfPos = rf.getCurrentPosition();
+            rrPos = rr.getCurrentPosition();
 
-            tickspersecond1 = motor1pos - prevmotor1pos;
-            tickspersecond2 = motor2pos - prevmotor2pos;
+            ticksPerSecondlf = lfPos - prevlfpos;
+            ticksPerSecondlr = lrPos - prevlrpos;
+            ticksPerSecondrf = rfPos - prevrfpos;
+            ticksPerSecondrr = rrPos - prevrrpos;
 
-            prevmotor1pos = motor1pos;
-            prevmotor2pos = motor2pos;
+            prevlfpos = lfPos;
+            prevlrpos = lrPos;
+            prevrfpos = rfPos;
+            prevrrpos = rrPos;
 
-            difference = Math.abs(tickspersecond1 - tickspersecond2);
+
 
             timer.reset();
         }
 
-        telemetry.addData("1: ", tickspersecond1);
-        telemetry.addData("2: ", tickspersecond2);
-        telemetry.addData("Difference: ", difference);
+        telemetry.addData("LF: ", ticksPerSecondlf);
+        telemetry.addData("LR: ", ticksPerSecondlr);
+        telemetry.addData("RF: ", ticksPerSecondrf);
+        telemetry.addData("RR: ", ticksPerSecondrr);
         telemetry.update();
 
     }

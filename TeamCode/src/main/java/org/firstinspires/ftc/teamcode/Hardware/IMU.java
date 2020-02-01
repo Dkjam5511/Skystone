@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -20,16 +19,22 @@ public class IMU {
     public void initialize(){
         BNO055IMU.Parameters IMUParameters = new BNO055IMU.Parameters();
         IMUParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        IMUParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        IMUParameters.calibrationDataFile = "AdafruitIMUCalibration.json";
+        //IMUParameters.mode = BNO055IMU.SensorMode.IMU;
+        //IMUParameters.calibrationDataFile = "AdafruitIMUCalibration.json";
+        //IMUParameters.calibrationDataFile = "IMUCalibration.json";
 
         imu.initialize(IMUParameters);
     }
 
-    public double readCurrentHeading() {
+    public boolean getisGyroCalibrated(){
+        return imu.isGyroCalibrated();
+    }
 
+    public BNO055IMU.CalibrationStatus getCalibrationStatus(){
+        return imu.getCalibrationStatus();
+    }
 
-
+    public double getCurrentHeading() {
         double currentHeading;
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         currentHeading = angles.firstAngle; //Because REV Hub is upside down
@@ -59,7 +64,7 @@ public class IMU {
         double degreesOff;
         boolean goRight;
 
-        currentHeading = readCurrentHeading();
+        currentHeading = getCurrentHeading();
 
         goRight = targetHeading > currentHeading;
         degreesOff = Math.abs(targetHeading - currentHeading);

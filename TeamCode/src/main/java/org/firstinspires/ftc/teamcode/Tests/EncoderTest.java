@@ -1,15 +1,8 @@
 package org.firstinspires.ftc.teamcode.Tests;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.Hardware.Odometers;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
-
-import java.util.List;
 
 @TeleOp(name = "Encoder Test", group = "Tests")
 public class EncoderTest extends Robot {
@@ -21,8 +14,13 @@ public class EncoderTest extends Robot {
         waitForStart();
 
         while (opModeIsActive()) {
-            telemetry.addData("X Pos",odometers.getXPos());
-            telemetry.addData("Y Pos", odometers.getYPos());
+            telemetry.addData("Left Pos: ",odometers.getLeftEncoder().getCurrentPosition());
+            telemetry.addData("Right Pos: ", odometers.getRightEncoder().getCurrentPosition());
+            telemetry.addData("RR Heading: ", getRRHeading());
+            telemetry.addData("IMU Heading: ", imu.getCurrentHeading());
+            telemetry.addData("IMU angles: ", imu.printAngles());
+            telemetry.addData("Scuffed Heading: ", odometers.getHeading());
+            telemetry.addData("Calibration status: ", imu.getCalibrationStatus().toString());
             telemetry.update();
         }
     }
