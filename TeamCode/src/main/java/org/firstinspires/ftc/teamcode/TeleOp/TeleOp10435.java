@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -6,8 +6,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.GlobalPositions;
+import org.firstinspires.ftc.teamcode.Hardware.DriveTrain;
+import org.firstinspires.ftc.teamcode.Hardware.FoundationGrabbers;
+import org.firstinspires.ftc.teamcode.Hardware.Intake;
+import org.firstinspires.ftc.teamcode.Hardware.LiftSystem;
+import org.firstinspires.ftc.teamcode.Hardware.SideGrabbers;
+import org.firstinspires.ftc.teamcode.TeleOp.Gamepad.GamepadWrapper;
+
 @TeleOp(name = "TeleOp", group = "TeleOp")
 public class TeleOp10435 extends OpMode {
+
+    public DriveTrain driveTrain;
+    public Intake intake;
+    public FoundationGrabbers grabbers;
+    public LiftSystem liftSystem;
+    public SideGrabbers sideGrabbers;
+
     DcMotor lf;
     DcMotor rf;
     DcMotor lr;
@@ -22,8 +37,11 @@ public class TeleOp10435 extends OpMode {
     Servo hookL;
     Servo hookR;
     Servo capstonePost;
+    Servo rightClaw;
+    Servo rightClawPivot;
+    Servo leftClaw;
+    Servo leftClawPivot;
     int stoneLevel = 0;
-    int reverse = 1;
     final static int stoneTickHeight = 140;
     final static int firstStoneGap = 65;
     int liftTargetTicks;
@@ -45,14 +63,15 @@ public class TeleOp10435 extends OpMode {
     boolean extending = false;
     boolean retracting = false;
     boolean releasing = false;
-    boolean reversing = false;
     boolean vAtIntakePos = true;
     boolean hAtIntakePos = true;
     boolean vLiftFirstRun = true;
     boolean hLiftFirstRun = true;
     boolean deployingCapstone = false;
     boolean vLTicksPerSecFirstRun = true;
-
+    boolean usingIntake = true;
+    boolean rightClawDown = false;
+    boolean rightClawClosed = false;
 
     ElapsedTime vLTicksPerSecTimer = new ElapsedTime();
     ElapsedTime aTimer = new ElapsedTime();
@@ -67,6 +86,7 @@ public class TeleOp10435 extends OpMode {
     ElapsedTime dropTimer = new ElapsedTime();
     ElapsedTime vLiftSpeedTimer = new ElapsedTime();
     ElapsedTime hLiftTimer = new ElapsedTime();
+    ElapsedTime clawTimer = new ElapsedTime();
 
     @Override
     public void init() {
@@ -84,6 +104,10 @@ public class TeleOp10435 extends OpMode {
         hookL = hardwareMap.servo.get("hkl");
         hookR = hardwareMap.servo.get("hkr");
         capstonePost = hardwareMap.servo.get("cp");
+        rightClaw = hardwareMap.servo.get("rc");
+        rightClawPivot = hardwareMap.servo.get("rcp");
+        leftClaw = hardwareMap.servo.get("lc");
+        leftClawPivot = hardwareMap.servo.get("lcp");
 
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
@@ -101,57 +125,36 @@ public class TeleOp10435 extends OpMode {
         vLift.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         vLift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        driveTrain = new DriveTrain(lf, rf, lr, rr, false);
+        intake = new Intake(intakeL, intakeR);
+        grabbers = new FoundationGrabbers(hookL, hookR);
+        liftSystem = new LiftSystem(vLift, vLift2, hLift, stoneGrabber, stoneSpinner);
+        sideGrabbers = new SideGrabbers(rightClaw, rightClawPivot, leftClaw, leftClawPivot);
+
         stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_UP);
         stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_DOWN);
         hookL.setPosition(GlobalPositions.HOOKL_UP);
         hookR.setPosition(GlobalPositions.HOOKR_UP);
         capstonePost.setPosition(GlobalPositions.CAPSTONE_START);
+        rightClawPivot.setPosition(GlobalPositions.RIGHT_CLAW_PIVOT_UP);
+        rightClaw.setPosition(GlobalPositions.RIGHT_CLAW_CLOSED);
+        leftClaw.setPosition(GlobalPositions.LEFT_CLAW_CLOSED);
+        leftClawPivot.setPosition(GlobalPositions.LEFT_CLAW_PIVOT_UP);
     }
 
     @Override
     public void loop() {
+
+        //controller1.update();
+
         //Driving
-        double leftstickx = 0;
-        double leftsticky = 0;
-        double rightstickx = 0;
-        double wheelpower;
-        double stickangleradians;
-        double rightX;
-        double leftfrontpower;
-        double rightfrontpower;
-        double leftrearpower;
-        double rightrearpower;
-        double dpadpower = .25;
+        double leftStickX = gamepad1.left_stick_x;
+        double leftStickY = -gamepad1.left_stick_y;
+        double rightStickX = gamepad1.right_stick_x;
 
-        if (gamepad1.dpad_up) {
-            leftsticky = dpadpower;
-        } else if (gamepad1.dpad_right) {
-            leftstickx = dpadpower;
-        } else if (gamepad1.dpad_down) {
-            leftsticky = -dpadpower;
-        } else if (gamepad1.dpad_left) {
-            leftstickx = -dpadpower;
-        } else {
-            leftstickx = gamepad1.left_stick_x;
-            leftsticky = -gamepad1.left_stick_y;
-            rightstickx = gamepad1.right_stick_x;
-        }
-        wheelpower = Math.hypot(leftstickx, leftsticky);
-        stickangleradians = Math.atan2(leftsticky, leftstickx);
+        double[] drivePowers = driveTrain.calcWheelPowers(leftStickX, leftStickY, rightStickX);
 
-        stickangleradians = stickangleradians - Math.PI / 4; //adjust by 45 degrees
-
-        rightX = rightstickx * .5 * reverse;
-        leftfrontpower = (wheelpower * Math.cos(stickangleradians) + rightX);
-        rightfrontpower = (wheelpower * Math.sin(stickangleradians) - rightX);
-        leftrearpower = (wheelpower * Math.sin(stickangleradians) + rightX);
-        rightrearpower = (wheelpower * Math.cos(stickangleradians) - rightX);
-
-        lf.setPower(leftfrontpower);
-        rf.setPower(rightfrontpower);
-        lr.setPower(leftrearpower);
-        rr.setPower(rightrearpower);
-
+        driveTrain.applyPower(drivePowers[0],drivePowers[1],drivePowers[2],drivePowers[3]);
 
         //Control Maps
         if (gamepad1.a && aTimer2.seconds() > .2) {
@@ -160,37 +163,60 @@ public class TeleOp10435 extends OpMode {
             aTimer2.reset();
         }
 
-        if (reversing) {
-            reverse = -1;
-        } else {
-            reverse = 1;
+        if(gamepad1.dpad_up){
+            usingIntake = true;
         }
 
-        if (gamepad1.right_bumper) {
-            intakeOn = true;
-        }
-        if (gamepad1.left_bumper) {
-            intakeOn = false;
+        if (gamepad1.dpad_down){
+            usingIntake = false;
         }
 
-        if (intakeOn) {
-            if ((gamepad1.right_trigger == 1)) {
-                intakeL.setPower(-.75);
-                intakeR.setPower(-.75);
-            } else {
-                intakeL.setPower(1);
-                intakeR.setPower(1);
+        if (usingIntake) { //Intake Mode
+            if (gamepad1.right_bumper) {
+                intakeOn = true;
             }
-        } else {
-            if (gamepad1.right_trigger == 1) {
-                intakeL.setPower(-.75);
-                intakeR.setPower(-.75);
-            } else {
-                intakeL.setPower(0);
-                intakeR.setPower(0);
+            if (gamepad1.left_bumper) {
+                intakeOn = false;
             }
-        }
 
+            if (intakeOn) {
+                if ((gamepad1.right_trigger == 1)) {
+                    intake.reverse();
+                } else {
+                    intake.on();
+                }
+            } else {
+                if (gamepad1.right_trigger == 1) {
+                    intake.reverse();
+                } else {
+                    intake.off();
+                }
+            }
+        } else { //Claw Mode (In case of emergency)
+
+            if (gamepad1.right_bumper && clawTimer.seconds() > .25){
+                rightClawDown = !rightClawDown;
+                clawTimer.reset();
+            }
+
+            if (gamepad1.right_trigger == 1 && clawTimer.seconds() > .25){
+                rightClawClosed = !rightClawClosed;
+                clawTimer.reset();
+            }
+
+            if (rightClawDown){
+                rightClawPivot.setPosition(GlobalPositions.RIGHT_CLAW_PIVOT_DOWN);
+            } else {
+                rightClawPivot.setPosition(GlobalPositions.RIGHT_CLAW_PIVOT_UP);
+            }
+
+            if (rightClawClosed){
+                rightClaw.setPosition(GlobalPositions.RIGHT_CLAW_CLOSED);
+            } else{
+                rightClaw.setPosition(GlobalPositions.RIGHT_CLAW_OPEN);
+            }
+
+        }
         if (gamepad2.right_trigger >= .75) {
             stoneGrabber.setPosition(GlobalPositions.STONE_GRABBER_DOWN);
         }
@@ -341,9 +367,9 @@ public class TeleOp10435 extends OpMode {
                         vLift2.setPower(1);
                     }
                 } else {
-                    if (vLiftTicks > 30){
+                    if (vLiftTicks > 30) {
                         vAtIntakePos = false; // Activates holding
-                    } else{
+                    } else {
                         vAtIntakePos = true;
                     }
 
@@ -354,9 +380,9 @@ public class TeleOp10435 extends OpMode {
             } else {
                 powerCorrection = (Math.pow((Math.abs(liftTargetTicks - vLiftTicks) + 5) / 20, 2) + 20) / 100; //fix when going down
 
-                if (powerCorrection > 1){
+                if (powerCorrection > 1) {
                     powerCorrection = 1;
-                } else if (powerCorrection < -1){
+                } else if (powerCorrection < -1) {
                     powerCorrection = -1;
                 }
 
@@ -400,9 +426,9 @@ public class TeleOp10435 extends OpMode {
                 vLift.setPower(getVLiftStickValue());
                 vLift2.setPower(getVLiftStickValue());
 
-                if (vLiftTicks > 60){
+                if (vLiftTicks > 60) {
                     vAtIntakePos = false; // Activates holding
-                } else{
+                } else {
                     vAtIntakePos = true;
                 }
             }
@@ -461,8 +487,7 @@ public class TeleOp10435 extends OpMode {
         double liftStickPower;
         liftStickPower = gamepad2.left_stick_y;
 
-
-        if (estStoneLevel() >= 9 ){
+        if (estStoneLevel() >= 9) {
             extraJuice = .04;
         }
 
@@ -470,7 +495,7 @@ public class TeleOp10435 extends OpMode {
 
             if (gamepad2.left_stick_y > 0) { // if we are going down
 
-                if (gamepad2.left_stick_y < .8){
+                if (gamepad2.left_stick_y < .8) {
                     if (vLTicksPerSec < -50) {
                         liftStickPower = -.01;
                     } else {
@@ -489,10 +514,10 @@ public class TeleOp10435 extends OpMode {
         return -liftStickPower;
     }
 
-    private int estStoneLevel(){ //Estimates what stone level we are currently at
+    private int estStoneLevel() { //Estimates what stone level we are currently at
 
-        double stoneLevel = (vLiftTicks-firstStoneGap)/stoneTickHeight;
+        double stoneLevel = (vLiftTicks - firstStoneGap) / stoneTickHeight;
 
-        return (int)stoneLevel;
+        return (int) stoneLevel;
     }
 }

@@ -33,11 +33,7 @@ public class VuforiaStuff {
     public skystonePos vuforiascan(boolean saveBitmaps, boolean red) {
         Image rgbImage = null;
         int rgbTries = 0;
-        /*
-        double colorcountL = 0;
-        double colorcountC = 0;
-        double colorcountR = 0;
-        */
+
         double yellowCountL = 1;
         double yellowCountC = 1;
         double yellowCountR = 1;

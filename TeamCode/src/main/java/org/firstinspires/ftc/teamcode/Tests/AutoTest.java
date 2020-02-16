@@ -1,18 +1,44 @@
 package org.firstinspires.ftc.teamcode.Tests;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Autonomous.Robot;
+
+import java.util.ArrayList;
 
 @Autonomous(name = "AutoTest", group = "Tests")
 public class AutoTest extends Robot {
     @Override
-
-
     public void runOpMode() throws InterruptedException {
         roboInit();
-        //checkCoast(0,48,0, 1, .15);
-        driveToPoint(0, 95, 0, 9);
+
+        driveToPoint4(new ArrayList<Pose2d>() {
+            {
+                add(new Pose2d(-70, 0, Math.toRadians(0)));
+                add(new Pose2d(0, 0, Math.toRadians(0)));
+            }
+        });
+
+        sleep(20000);
+        /*
+        driveToPoint4(new ArrayList<Pose2d>() {
+            {
+                add(new Pose2d(0, -6, Math.toRadians(0)));
+                add(new Pose2d(-80, -6, Math.toRadians(0)));
+                add(new Pose2d(-80, 0, Math.toRadians(0)));
+            }
+        }, 1);
+
+        driveToPoint4(new ArrayList<Pose2d>() {
+            {
+                add(new Pose2d(-80, -6, Math.toRadians(0)));
+                add(new Pose2d(0, -6, Math.toRadians(0)));
+                add(new Pose2d(0, 0, Math.toRadians(0)));
+            }
+        }, 1);
+
+         */
         //intake.on();
         // RED pick up left stone from left - this works
         //driveToPoint3(-40, 22, 45, .7, 3);

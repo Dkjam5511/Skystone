@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Tests;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.VuforiaStuff;
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Autonomous.Robot;
 
 @Autonomous (name = "Vuforia Test B", group = "Tests")
 public class VuforiaTestBlue extends Robot {

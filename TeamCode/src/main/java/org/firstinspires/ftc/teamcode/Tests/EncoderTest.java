@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Autonomous.Robot;
 
 @TeleOp(name = "Encoder Test", group = "Tests")
 public class EncoderTest extends Robot {
@@ -14,13 +14,11 @@ public class EncoderTest extends Robot {
         waitForStart();
 
         while (opModeIsActive()) {
-            telemetry.addData("Left Pos: ",odometers.getLeftEncoder().getCurrentPosition());
-            telemetry.addData("Right Pos: ", odometers.getRightEncoder().getCurrentPosition());
-            telemetry.addData("RR Heading: ", getRRHeading());
-            telemetry.addData("IMU Heading: ", imu.getCurrentHeading());
-            telemetry.addData("IMU angles: ", imu.printAngles());
-            telemetry.addData("Scuffed Heading: ", odometers.getHeading());
-            telemetry.addData("Calibration status: ", imu.getCalibrationStatus().toString());
+            telemetry.addData("IMU Heading: ", localizer.imu.getIMUHeading());
+            telemetry.addData("X: ", localizer.getXPosition());
+            telemetry.addData("Y: ", localizer.getYPosition());
+            telemetry.addData("RR Heading Degrees: ", localizer.getCurrentHeadingDegrees());
+            telemetry.addData("RR Heading Radians: ", localizer.getCurrentHeadingRadians());
             telemetry.update();
         }
     }

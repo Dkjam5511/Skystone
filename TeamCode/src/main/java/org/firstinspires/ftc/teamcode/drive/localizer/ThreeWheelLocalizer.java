@@ -35,8 +35,8 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double WHEEL_RADIUS = (2.3622/2); // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
-    public static double LATERAL_DISTANCE = 14.75; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = -4.5; // in; offset of the lateral wheel
+    public static double LATERAL_DISTANCE = 14.85; // in; distance between the left and right wheels
+    public static double FORWARD_OFFSET = 4.5; // in; offset of the lateral wheel
 
     private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
     private ExpansionHubEx hub, hub2;
@@ -55,7 +55,7 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
 
         leftEncoder = hardwareMap.get(ExpansionHubMotor.class, "il");
         rightEncoder = hardwareMap.get(ExpansionHubMotor.class, "ir");
-        frontEncoder = hardwareMap.get(ExpansionHubMotor.class,"rr");
+        frontEncoder = hardwareMap.get(ExpansionHubMotor.class,"vl2");
 
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -79,7 +79,7 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
         return Arrays.asList(
                 encoderTicksToInches(bulkData2.getMotorCurrentPosition(leftEncoder)),
                 encoderTicksToInches(-bulkData.getMotorCurrentPosition(rightEncoder)),
-                encoderTicksToInches(-bulkData.getMotorCurrentPosition(frontEncoder))
+                encoderTicksToInches(bulkData.getMotorCurrentPosition(frontEncoder))
         );
     }
 
@@ -90,7 +90,7 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
         return Arrays.asList(
                 encoderTicksToInches(bulkData2.getMotorVelocity(leftEncoder)),
                 encoderTicksToInches(-bulkData.getMotorVelocity(rightEncoder)),
-                encoderTicksToInches(-bulkData.getMotorVelocity(frontEncoder))
+                encoderTicksToInches(bulkData.getMotorVelocity(frontEncoder))
         );
     }
 }

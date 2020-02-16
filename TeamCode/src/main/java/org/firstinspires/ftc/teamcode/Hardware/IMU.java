@@ -34,7 +34,7 @@ public class IMU {
         return imu.getCalibrationStatus();
     }
 
-    public double getCurrentHeading() {
+    public double getIMUHeading() {
         double currentHeading;
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         currentHeading = angles.firstAngle; //Because REV Hub is upside down
@@ -64,7 +64,7 @@ public class IMU {
         double degreesOff;
         boolean goRight;
 
-        currentHeading = getCurrentHeading();
+        currentHeading = getIMUHeading();
 
         goRight = targetHeading > currentHeading;
         degreesOff = Math.abs(targetHeading - currentHeading);

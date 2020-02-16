@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
 
 @Autonomous (name = "RR Blue", group = "Autonomous")
@@ -17,11 +16,12 @@ public class RrBlue extends Robot {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        /*
         roboInit();
         drive.setPoseEstimate(currentPose);
 
         drive.followTrajectorySync(
-        drive.trajectoryBuilder(currentPose,SampleMecanumDriveBase.constraints)
+        localizer.drive.trajectoryBuilder(currentPose,SampleMecanumDriveBase.constraints)
                 .strafeTo(new Vector2d(-15.0,35.0))
                 .forward(8)
                 .build()
@@ -65,5 +65,8 @@ public class RrBlue extends Robot {
                         .strafeTo(new Vector2d(-48.0, 20.0))
                         .build()
         );
+
+         */
     }
+
 }

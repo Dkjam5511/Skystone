@@ -27,4 +27,14 @@ public class GlobalPositions {
     public static final double DTP_SPEED_SENSITIVITY = 7;  // For driveToPoint3 routines - WAS 7
     public static final double DTP_DISTANCE_REMAINING = 2;  // For driveToPoint3 routines - WAS 1
 
+    public static final double RIGHT_CLAW_CLOSED = 1;
+    public static final double RIGHT_CLAW_OPEN = .5;
+    public static final double RIGHT_CLAW_PIVOT_UP = .5;
+    public static final double RIGHT_CLAW_PIVOT_DOWN = .87;
+
+    public static final double LEFT_CLAW_CLOSED = 0;
+    public static final double LEFT_CLAW_OPEN = .5;
+    public static final double LEFT_CLAW_PIVOT_UP = .5;
+    public static final double LEFT_CLAW_PIVOT_DOWN = .1;
+
 }

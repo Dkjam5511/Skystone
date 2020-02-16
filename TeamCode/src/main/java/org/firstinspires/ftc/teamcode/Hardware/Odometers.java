@@ -7,10 +7,6 @@ public class Odometers {
     public DcMotor leftEncoder;
     public DcMotor rightEncoder;
 
-    double currentHeading = 0;
-    double prevLeftTicks = 0;
-    double prevRightTicks = 0;
-
     public Odometers(DcMotor frontEncoder, DcMotor leftEncoder, DcMotor rightEncoder) {
         frontEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -40,7 +36,7 @@ public class Odometers {
     public DcMotor getRightEncoder() {
         return rightEncoder;
     }
-
+    /*
     public double getHeading(){
         currentHeading = (((leftEncoder.getCurrentPosition() - rightEncoder.getCurrentPosition())*45.0/1778.0 )/35.56);
         //currentHeading += ((((leftEncoder.getCurrentPosition() - prevLeftTicks) * 6 * Math.PI - ((rightEncoder.getCurrentPosition() - prevRightTicks) * 6 * Math.PI))/38.1)*3)/20;
@@ -50,4 +46,6 @@ public class Odometers {
 
         return currentHeading;
     }
+
+     */
 }

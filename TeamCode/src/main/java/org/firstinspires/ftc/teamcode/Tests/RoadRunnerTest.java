@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.VuforiaStuff;
 import org.firstinspires.ftc.teamcode.GlobalPositions;
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Autonomous.Robot;
 import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
 
 import kotlin.Unit;
@@ -21,6 +21,7 @@ public class RoadRunnerTest extends Robot {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        /*
         roboInit();
         drive.setPoseEstimate(currentPose);
         pos = vuforiaStuff.vuforiascan(false, false);
@@ -153,5 +154,7 @@ public class RoadRunnerTest extends Robot {
                         .build()
         );
         currentPose = drive.getPoseEstimate();
+
+         */
     }
 }

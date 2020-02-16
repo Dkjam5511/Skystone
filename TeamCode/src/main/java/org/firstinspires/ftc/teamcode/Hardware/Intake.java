@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.Hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class Intake {
     DcMotor intakeL;
@@ -16,7 +15,7 @@ public class Intake {
 
     public void on(){
         intakeL.setPower(1);
-        intakeR.setPower(-1);
+        intakeR.setPower(1);
     }
 
     public void onSlow(){
@@ -31,6 +30,6 @@ public class Intake {
 
     public void reverse(){
         intakeL.setPower(-.75);
-        intakeR.setPower(.75);
+        intakeR.setPower(-.75);
     }
 }

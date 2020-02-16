@@ -8,7 +8,7 @@ public class DriveTrain{
     DcMotor lr;
     DcMotor rr;
 
-    public DriveTrain(DcMotor lf, DcMotor rf, DcMotor lr, DcMotor rr){
+    public DriveTrain(DcMotor lf, DcMotor rf, DcMotor lr, DcMotor rr, boolean runUsingEncoder){
         rf.setDirection(DcMotor.Direction.REVERSE);
         rr.setDirection(DcMotor.Direction.REVERSE);
 
@@ -17,16 +17,17 @@ public class DriveTrain{
         lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        /*
-        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        lr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-*/
-        lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        lr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if (runUsingEncoder) {
+            lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            lr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rr.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        } else {
+            lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            lr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            rr.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
 
         this.lf = lf;
         this.rf = rf;
@@ -39,5 +40,31 @@ public class DriveTrain{
         rf.setPower(rfpower);
         lr.setPower(lrpower);
         rr.setPower(rrpower);
+    }
+
+    public double[] calcWheelPowers(double leftStickX, double leftStickY, double rightStickX){
+
+        double wheelPower;
+        double stickAngleRadians;
+        double rightX;
+        double lfPower;
+        double rfPower;
+        double lrPower;
+        double rrPower;
+
+        wheelPower = Math.hypot(leftStickX, leftStickY);
+        stickAngleRadians = Math.atan2(leftStickY, leftStickX);
+
+        stickAngleRadians = stickAngleRadians - Math.PI / 4; //adjust by 45 degrees
+
+        rightX = rightStickX * .5;
+        lfPower = (wheelPower * Math.cos(stickAngleRadians) + rightX);
+        rfPower = (wheelPower * Math.sin(stickAngleRadians) - rightX);
+        lrPower = (wheelPower * Math.sin(stickAngleRadians) + rightX);
+        rrPower = (wheelPower * Math.cos(stickAngleRadians) - rightX);
+
+        double[] array = new double[]{lfPower, rfPower, lrPower, rrPower};
+
+        return array;
     }
 }

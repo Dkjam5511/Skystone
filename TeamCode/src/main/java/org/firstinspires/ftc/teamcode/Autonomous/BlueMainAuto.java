@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.Hardware.LiftSystem;
-import org.firstinspires.ftc.teamcode.Robot;
 
 
 @Autonomous(name = "Blue Auto", group = "Autonomous")
@@ -46,7 +45,6 @@ public class BlueMainAuto extends Robot {
         //liftSystem.hLift.setPower(0);
         intake.off();
         turn_to_heading(90, 0);
-        liftSystem.extensionState = LiftSystem.ExtensionState.EXTENDING;
         driveToPoint(0, -64.5 - stoneDiff, 90, 11);
         turn_to_heading(180, 0); // do the drop
         grabbers.ready();
@@ -57,7 +55,6 @@ public class BlueMainAuto extends Robot {
         liftSystem.dropStone();
         sleep(500);
         //liftSystem.retract();
-        liftSystem.extensionState = LiftSystem.ExtensionState.RETRACTING;
         driveToPoint(0, 14, 180, 3);
         turn_to_heading(95, 15);
         driveToPoint(0, -14, 90, 2.4);
@@ -67,7 +64,6 @@ public class BlueMainAuto extends Robot {
         //liftSystem.hLift.setPower(-.2);
         sleep(500);
         driveTrain.applyPower(0, 0, 0, 0);
-        liftSystem.stopMotors();
         intake.off();
     }
 }

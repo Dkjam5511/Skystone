@@ -21,7 +21,7 @@ public class IMUTest extends OpMode {
 
     @Override
     public void loop() {
-        double heading = imu.getCurrentHeading();
+        double heading = imu.getIMUHeading();
         telemetry.addData("Heading", heading);
         telemetry.update();
     }
