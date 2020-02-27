@@ -8,35 +8,47 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @TeleOp (name = "Servo Test", group = "Tests")
 public class ServoTest extends OpMode {
 
-    Servo servoL;
-    Servo servoR;
+    Servo servo1;
+    Servo servo2;
 
     ElapsedTime timer = new ElapsedTime();
 
-    double pos = 0;
+    double pos = .5;
+    double pos2 = .5;
 
     @Override
     public void init() {
-        servoL = hardwareMap.servo.get("lcp");
-        servoR = hardwareMap.servo.get("hkl");
+        servo1 = hardwareMap.servo.get("lc");
+        servo2 = hardwareMap.servo.get("lcp");
     }
 
     @Override
     public void loop() {
         if(gamepad1.a && timer.seconds() > .2){
-            pos = pos - .01;
-            timer.reset();
-        }
-
-        if (gamepad1.y && timer.seconds() > .2){
             pos = pos + .01;
             timer.reset();
         }
 
-        servoL.setPosition(pos);
-        //servoR.setPosition(pos);
+        if (gamepad1.y && timer.seconds() > .2){
+            pos = pos - .01;
+            timer.reset();
+        }
 
-        telemetry.addData("Pos: ", pos);
+        if(gamepad1.x && timer.seconds() > .2){
+            pos2 = pos2 + .01;
+            timer.reset();
+        }
+
+        if (gamepad1.b && timer.seconds() > .2){
+            pos2 = pos2 - .01;
+            timer.reset();
+        }
+        servo1.setPosition(pos);
+        servo2.setPosition(pos2);
+
+        telemetry.addData("Pos1: ", pos);
+        telemetry.addData("Pos2: ", pos2);
+        telemetry.update();
     }
 }
 

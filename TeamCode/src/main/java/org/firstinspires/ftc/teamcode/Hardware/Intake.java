@@ -15,12 +15,12 @@ public class Intake {
 
     public void on(){
         intakeL.setPower(1);
-        intakeR.setPower(1);
+        intakeR.setPower(-1);
     }
 
     public void onSlow(){
-        intakeL.setPower(.3);
-        intakeR.setPower(-.3);
+        intakeL.setPower(1);
+        intakeR.setPower(-1);
     }
 
     public void off(){
@@ -30,6 +30,6 @@ public class Intake {
 
     public void reverse(){
         intakeL.setPower(-.75);
-        intakeR.setPower(-.75);
+        intakeR.setPower(.75);
     }
 }

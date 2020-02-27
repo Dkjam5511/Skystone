@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.localizer;
+package org.firstinspires.ftc.teamcode.RoadRunner.localizer;
 
 import android.support.annotation.NonNull;
 
@@ -36,7 +36,7 @@ public class ThreeWheelLocalizer extends ThreeTrackingWheelLocalizer {
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
     public static double LATERAL_DISTANCE = 14.85; // in; distance between the left and right wheels
-    public static double FORWARD_OFFSET = 4.5; // in; offset of the lateral wheel
+    public static double FORWARD_OFFSET = -6; // in; offset of the lateral wheel
 
     private ExpansionHubMotor leftEncoder, rightEncoder, frontEncoder;
     private ExpansionHubEx hub, hub2;

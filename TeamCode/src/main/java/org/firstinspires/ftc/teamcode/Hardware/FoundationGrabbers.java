@@ -13,6 +13,14 @@ public class FoundationGrabbers {
         this.hookR = hookR;
     }
 
+    public Servo getHookL() {
+        return hookL;
+    }
+
+    public Servo getHookR() {
+        return hookR;
+    }
+
     public void down(){
         hookL.setPosition(GlobalPositions.HOOKL_DOWN);
         hookR.setPosition(GlobalPositions.HOOKR_DOWN);

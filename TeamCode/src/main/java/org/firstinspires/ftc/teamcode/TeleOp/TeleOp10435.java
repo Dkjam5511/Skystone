@@ -44,6 +44,7 @@ public class TeleOp10435 extends OpMode {
     int stoneLevel = 0;
     final static int stoneTickHeight = 140;
     final static int firstStoneGap = 65;
+    final static int maxVLiftTicks = 1400;
     int liftTargetTicks;
     int prevVLiftTicks;
     int vLiftSpeed;
@@ -71,7 +72,9 @@ public class TeleOp10435 extends OpMode {
     boolean vLTicksPerSecFirstRun = true;
     boolean usingIntake = true;
     boolean rightClawDown = false;
-    boolean rightClawClosed = false;
+    boolean rightClawClosed = true;
+    boolean leftClawDown = false;
+    boolean leftClawClosed = true;
 
     ElapsedTime vLTicksPerSecTimer = new ElapsedTime();
     ElapsedTime aTimer = new ElapsedTime();
@@ -113,7 +116,6 @@ public class TeleOp10435 extends OpMode {
         rr.setDirection(DcMotor.Direction.REVERSE);
         vLift.setDirection(DcMotor.Direction.REVERSE);
         vLift2.setDirection(DcMotor.Direction.REVERSE);
-        intakeR.setDirection(DcMotor.Direction.REVERSE);
 
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -144,8 +146,6 @@ public class TeleOp10435 extends OpMode {
 
     @Override
     public void loop() {
-
-        //controller1.update();
 
         //Driving
         double leftStickX = gamepad1.left_stick_x;
@@ -193,7 +193,7 @@ public class TeleOp10435 extends OpMode {
                 }
             }
         } else { //Claw Mode (In case of emergency)
-
+            //right
             if (gamepad1.right_bumper && clawTimer.seconds() > .25){
                 rightClawDown = !rightClawDown;
                 clawTimer.reset();
@@ -214,6 +214,29 @@ public class TeleOp10435 extends OpMode {
                 rightClaw.setPosition(GlobalPositions.RIGHT_CLAW_CLOSED);
             } else{
                 rightClaw.setPosition(GlobalPositions.RIGHT_CLAW_OPEN);
+            }
+
+            //left
+            if (gamepad1.left_bumper && clawTimer.seconds() > .25){
+                leftClawDown = !leftClawDown;
+                clawTimer.reset();
+            }
+
+            if (gamepad1.left_trigger == 1 && clawTimer.seconds() > .25){
+                leftClawClosed = !leftClawClosed;
+                clawTimer.reset();
+            }
+
+            if (leftClawDown){
+                leftClawPivot.setPosition(GlobalPositions.LEFT_CLAW_PIVOT_DOWN);
+            } else {
+                leftClawPivot.setPosition(GlobalPositions.LEFT_CLAW_PIVOT_UP);
+            }
+
+            if (leftClawClosed){
+                leftClaw.setPosition(GlobalPositions.LEFT_CLAW_CLOSED);
+            } else{
+                leftClaw.setPosition(GlobalPositions.LEFT_CLAW_OPEN);
             }
 
         }
@@ -360,7 +383,7 @@ public class TeleOp10435 extends OpMode {
 
         if (lifting) {
             if (vManualLift) {
-                if (releasing && vLiftTicks < releasingTicks + 150) {
+                if (releasing && vLiftTicks < releasingTicks + 150 && vLiftTicks < maxVLiftTicks) { //When releasing a stone
                     if (dropTimer.seconds() > .25) {
                         extraLiftSauce = 30;
                         vLift.setPower(1);
@@ -372,7 +395,6 @@ public class TeleOp10435 extends OpMode {
                     } else {
                         vAtIntakePos = true;
                     }
-
                     releasing = false;
                     vLift.setPower(getVLiftStickValue());
                     vLift2.setPower(getVLiftStickValue());
@@ -396,6 +418,8 @@ public class TeleOp10435 extends OpMode {
                     vLift.setPower(GlobalPositions.MIN_VLIFT_HOLD_POWER);
                     vLift2.setPower(GlobalPositions.MIN_VLIFT_HOLD_POWER);
                 }
+
+                releasing = false;
             }
         } else {
             if (!vAtIntakePos && !vManualLift) {
@@ -442,8 +466,13 @@ public class TeleOp10435 extends OpMode {
                     hLift.setPosition(1);
                     hLiftPos = 1;
                 } else {
-                    hLift.setPosition(.8);
-                    hLiftPos = .8;
+                    if (stoneLevel < 7) {
+                        hLift.setPosition(1);
+                        hLiftPos = 1;
+                    } else {
+                        hLift.setPosition(.8);
+                        hLiftPos = .8;
+                    }
                 }
             } else if (hLiftTimer.seconds() < 1.25 && deployingCapstone) {
                 stoneSpinner.setPosition(GlobalPositions.STONE_SPINNER_CAPSTONE);

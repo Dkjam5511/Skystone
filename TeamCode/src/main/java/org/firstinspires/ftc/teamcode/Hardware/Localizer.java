@@ -4,12 +4,13 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
+import org.firstinspires.ftc.teamcode.RoadRunner.mecanum.SampleMecanumDriveBase;
+import org.firstinspires.ftc.teamcode.RoadRunner.mecanum.SampleMecanumDriveREVOptimized;
 
 public class Localizer {
     public SampleMecanumDriveBase drive;
     public IMU imu;
+    public double XWallDiff = 0;
 
     public Localizer(BNO055IMU imu, HardwareMap hardwareMap){
         drive = new SampleMecanumDriveREVOptimized(hardwareMap);
@@ -37,7 +38,7 @@ public class Localizer {
 
     public double getXPosition(){
         drive.update();
-        return drive.getPoseEstimate().getX();
+        return drive.getPoseEstimate().getX() + XWallDiff;
     }
 
     public double getYPosition(){
@@ -71,6 +72,13 @@ public class Localizer {
             adjustment = -adjustment;
         }
         return adjustment;
+    }
+
+    public void artificialAdjust(double heading, double x){
+        Pose2d pose = drive.getPoseEstimate();
+
+        drive.setPoseEstimate(new Pose2d(pose.getX() - x, pose.getY(), pose.getHeading() + Math.toRadians(heading)));
+
     }
 
 }

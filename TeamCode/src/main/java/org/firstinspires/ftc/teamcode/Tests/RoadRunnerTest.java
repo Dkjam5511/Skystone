@@ -1,17 +1,11 @@
 package org.firstinspires.ftc.teamcode.Tests;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 
-import com.acmerobotics.roadrunner.path.heading.SplineInterpolator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Autonomous.VuforiaStuff;
-import org.firstinspires.ftc.teamcode.GlobalPositions;
 import org.firstinspires.ftc.teamcode.Autonomous.Robot;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-
-import kotlin.Unit;
 
 @Autonomous(name = "Roadrunner Test", group = "Tests")
 public class RoadRunnerTest extends Robot {
@@ -57,7 +51,7 @@ public class RoadRunnerTest extends Robot {
         }
         drive.setPoseEstimate(currentPose);
         drive.followTrajectorySync(
-                drive.trajectoryBuilder(currentPose, SampleMecanumDriveBase.constraints)
+                localizer.drive.trajectoryBuilder(currentPose, SampleMecanumDriveBase.constraints)
                         .back(18.0)
 
                         .addMarker(2, () -> {

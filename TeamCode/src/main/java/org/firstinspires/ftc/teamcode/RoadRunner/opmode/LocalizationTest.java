@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmode;
+package org.firstinspires.ftc.teamcode.RoadRunner.opmode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -6,9 +6,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveBase;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREV;
-import org.firstinspires.ftc.teamcode.drive.mecanum.SampleMecanumDriveREVOptimized;
+import org.firstinspires.ftc.teamcode.RoadRunner.mecanum.SampleMecanumDriveBase;
+import org.firstinspires.ftc.teamcode.RoadRunner.mecanum.SampleMecanumDriveREVOptimized;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -31,7 +30,7 @@ public class LocalizationTest extends LinearOpMode {
             drive.setDrivePower(new Pose2d(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x/2
+                    -gamepad1.right_stick_x
             ));
 
             drive.update();

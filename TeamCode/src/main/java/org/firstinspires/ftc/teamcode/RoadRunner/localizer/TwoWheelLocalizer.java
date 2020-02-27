@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.localizer;
+package org.firstinspires.ftc.teamcode.RoadRunner.localizer;
 
 import android.support.annotation.NonNull;
 
@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.localization.TwoTrackingWheelLocalizer;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.openftc.revextensions2.ExpansionHubEx;
@@ -16,8 +15,6 @@ import org.openftc.revextensions2.RevBulkData;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.encoderTicksToInches;
 
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:

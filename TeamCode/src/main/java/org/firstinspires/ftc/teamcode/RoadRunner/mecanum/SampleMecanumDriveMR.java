@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.tank;
+package org.firstinspires.ftc.teamcode.RoadRunner.mecanum;
 
 import android.support.annotation.NonNull;
 
@@ -9,16 +9,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.DifferentialControlLoopCoefficients;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MOTOR_VELO_PID;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCODER;
-import static org.firstinspires.ftc.teamcode.drive.DriveConstants.encoderTicksToInches;
+import static org.firstinspires.ftc.teamcode.RoadRunner.DriveConstants.MOTOR_VELO_PID;
+import static org.firstinspires.ftc.teamcode.RoadRunner.DriveConstants.RUN_USING_ENCODER;
+import static org.firstinspires.ftc.teamcode.RoadRunner.DriveConstants.encoderTicksToInches;
+
 /*
- * Simple tank drive hardware implementation for Modern Robotics hardware.
+ * Simple mecanum drive hardware implementation for Modern Robotics hardware.
  */
-public class SampleTankDriveMR extends SampleTankDriveBase {
+public class SampleMecanumDriveMR extends SampleMecanumDriveBase {
     /*
      * As you may know, the MR communication system is implemented asynchronously. Thus, all
      * hardware calls return immediately (reads are cached and writes are queued). To ensure that
@@ -29,10 +31,11 @@ public class SampleTankDriveMR extends SampleTankDriveBase {
      */
     private static final int MOTOR_WRITE_DELAY = 20;
 
-    private List<DcMotor> motors, leftMotors, rightMotors;
+    private DcMotor leftFront, leftRear, rightRear, rightFront;
+    private List<DcMotor> motors;
     private BNO055IMU imu;
 
-    public SampleTankDriveMR(HardwareMap hardwareMap) {
+    public SampleMecanumDriveMR(HardwareMap hardwareMap) {
         super();
 
         // TODO: adjust the names of the following hardware devices to match your configuration
@@ -45,15 +48,12 @@ public class SampleTankDriveMR extends SampleTankDriveBase {
         // upward (normal to the floor) using a command like the following:
         // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
 
-        // add/remove motors depending on your robot (e.g., 6WD)
-        DcMotor leftFront = hardwareMap.dcMotor.get("leftFront");
-        DcMotor leftRear = hardwareMap.dcMotor.get("leftRear");
-        DcMotor rightRear = hardwareMap.dcMotor.get("rightRear");
-        DcMotor rightFront = hardwareMap.dcMotor.get("rightFront");
+        leftFront = hardwareMap.dcMotor.get("leftFront");
+        leftRear = hardwareMap.dcMotor.get("leftRear");
+        rightRear = hardwareMap.dcMotor.get("rightRear");
+        rightFront = hardwareMap.dcMotor.get("rightFront");
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
-        leftMotors = Arrays.asList(leftFront, leftRear);
-        rightMotors = Arrays.asList(rightFront, rightRear);
 
         for (DcMotor motor : motors) {
             if (RUN_USING_ENCODER) {
@@ -74,9 +74,8 @@ public class SampleTankDriveMR extends SampleTankDriveBase {
 
     @Override
     public PIDCoefficients getPIDCoefficients(DcMotor.RunMode runMode) {
-        DcMotor leftFirst = leftMotors.get(0);
-        ModernRoboticsUsbDcMotorController controller = (ModernRoboticsUsbDcMotorController) leftFirst.getController();
-        DifferentialControlLoopCoefficients coefficients = controller.getDifferentialControlLoopCoefficients(leftFirst.getPortNumber());
+        ModernRoboticsUsbDcMotorController controller = (ModernRoboticsUsbDcMotorController) leftFront.getController();
+        DifferentialControlLoopCoefficients coefficients = controller.getDifferentialControlLoopCoefficients(leftFront.getPortNumber());
         return new PIDCoefficients(coefficients.p, coefficients.i, coefficients.d);
     }
 
@@ -93,24 +92,19 @@ public class SampleTankDriveMR extends SampleTankDriveBase {
     @NonNull
     @Override
     public List<Double> getWheelPositions() {
-        double leftSum = 0, rightSum = 0;
-        for (DcMotor leftMotor : leftMotors) {
-            leftSum += encoderTicksToInches(leftMotor.getCurrentPosition());
+        List<Double> wheelPositions = new ArrayList<>();
+        for (DcMotor motor : motors) {
+            wheelPositions.add(encoderTicksToInches(motor.getCurrentPosition()));
         }
-        for (DcMotor rightMotor : rightMotors) {
-            rightSum += encoderTicksToInches(rightMotor.getCurrentPosition());
-        }
-        return Arrays.asList(leftSum / leftMotors.size(), rightSum / rightMotors.size());
+        return wheelPositions;
     }
 
     @Override
-    public void setMotorPowers(double v, double v1) {
-        for (DcMotor leftMotor : leftMotors) {
-            leftMotor.setPower(v);
-        }
-        for (DcMotor rightMotor : rightMotors) {
-            rightMotor.setPower(v1);
-        }
+    public void setMotorPowers(double v, double v1, double v2, double v3) {
+        leftFront.setPower(v);
+        leftRear.setPower(v1);
+        rightRear.setPower(v2);
+        rightFront.setPower(v3);
 
         try {
             Thread.sleep(MOTOR_WRITE_DELAY);

@@ -26,6 +26,8 @@ public class VuforiaStuff {
         this.vuforia = vuforia;
     }
 
+    public DbgLog DbgLog;
+
     public enum skystonePos {
         LEFT, CENTER, RIGHT;
     }
@@ -33,6 +35,10 @@ public class VuforiaStuff {
     public skystonePos vuforiascan(boolean saveBitmaps, boolean red) {
         Image rgbImage = null;
         int rgbTries = 0;
+
+        DbgLog DbgLog = new DbgLog();
+
+        DbgLog.openLog();
 
         double yellowCountL = 1;
         double yellowCountC = 1;
