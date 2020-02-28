@@ -25,7 +25,7 @@ public class GlobalPositions {
     public static final double CAPSTONE_START = .15;
 
     public static final double DTP_SPEED_SENSITIVITY = 7;  // For driveToPoint3 routines - WAS 7
-    public static final double DTP_DISTANCE_REMAINING = 2;  // For driveToPoint3 routines - WAS 1
+    public static final double DTP_DISTANCE_REMAINING = 1.5;  // For driveToPoint3 routines - WAS 1
 
     public static final double RIGHT_CLAW_CLOSED = .92;
     public static final double RIGHT_CLAW_OPEN = .39;

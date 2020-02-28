@@ -19,8 +19,8 @@ public class Intake {
     }
 
     public void onSlow(){
-        intakeL.setPower(1);
-        intakeR.setPower(-1);
+        intakeL.setPower(.6);
+        intakeR.setPower(-.3);
     }
 
     public void off(){
